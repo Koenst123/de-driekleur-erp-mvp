@@ -2,6 +2,8 @@
 
 ## Verkoop
 
+Optionele aanloop: offerte opstellen → uitbrengen → afdrukken indien gewenst → klantakkoord registreren → gekoppelde verkooporder in concept. Een uitgegeven offerte houdt de prijsregels vast. De verkoopbevestiging controleert de beschikbare voorraad.
+
 Klant kiezen → concept met regels opslaan → beschikbaarheid in gekozen magazijn controleren → bevestigen en reserveren → pickopdracht openen → aantallen en barcodes registreren → pick afronden → verzending boeken → factuurconcept maken.
 
 - Onvoldoende voorraad houdt alle regels in concept. De order kan opnieuw worden bevestigd nadat de voorraad is aangevuld.
@@ -11,6 +13,8 @@ Klant kiezen → concept met regels opslaan → beschikbaarheid in gekozen magaz
 ## Inkoop
 
 Leverancier selecteren → regels aan concept toevoegen → bestelling bevestigen → deelontvangst invoeren met locatie → resterende aantallen ontvangen → order sluit na laatste ontvangst. Ontvangsten verhogen de fysieke voorraad en leggen mutaties vast.
+
+Voorraad aanvullen toont artikelen in hun voorkeursmagazijn waarvoor voorraad dreigt tekort te schieten of waarvoor inkoop in voorbereiding is. Bij een verwachting onder minimum stelt het scherm het verschil tot het aanvuldoel voor. Het voorstel hergebruikt een open concept voor hetzelfde artikel en magazijn. Na een deelontvangst verschuiven de ontvangen aantallen van In bestelling naar Beschikbaar.
 
 ## Documenten en website
 

@@ -16,7 +16,8 @@ export const select = (name, content, attrs = '') => '<select name="' + name + '
 export const textarea = (name, value, attrs = '') => '<textarea name="' + name + '" ' + attrs + '>' + esc(value) + '</textarea>';
 export const badge = (status, color = '') => '<span class="badge ' + esc(color || ({
   verzonden: 'green', ontvangen: 'green', gepikt: 'green', gepakt: 'green', bevestigd: 'blue',
-  besteld: 'blue', open: 'blue', 'gedeeltelijk ontvangen': 'amber', geannuleerd: 'red',
+  besteld: 'blue', open: 'blue', uitgebracht: 'blue', omgezet: 'green', afgewezen: 'red',
+  verlopen: 'amber', 'gedeeltelijk ontvangen': 'amber', geannuleerd: 'red',
 }[status] ?? 'neutral')) + '"><i></i>' + esc(status[0].toUpperCase() + status.slice(1)) + '</span>';
 export const sub = (primary, secondary) => '<strong class="cell-main">' + esc(primary) + '</strong><small class="cell-sub">' + esc(secondary) + '</small>';
 export const empty = (message = 'Geen resultaten gevonden.') => '<div class="empty">' + esc(message) + '</div>';

@@ -1,6 +1,6 @@
 import { balance, get, movement, mutableBalance, quantity, requireRule, stockOf } from './stock.js';
 
-function number(state, type, prefix, date) {
+export function displayNumber(state, type, prefix, date) {
   return prefix + '-' + date.slice(0, 4) + '-' + String(++state.counters[type]).padStart(4, '0');
 }
 
@@ -21,7 +21,7 @@ function checkedLines(state, lines) {
   }));
 }
 
-function saleLines(state, customer, lines) {
+export function priceSaleLines(state, customer, lines) {
   return checkedLines(state, lines).map(({ product, quantity }) => ({
     productId: product.id, sku: product.sku, name: product.name, packaging: product.packaging,
     quantity, price: customer.prices[product.id] ?? product.salePrice, taxRate: product.taxRate,
@@ -31,14 +31,15 @@ function saleLines(state, customer, lines) {
 export function saveSale(state, input, date) {
   const customer = get(state.customers, input.customerId, 'Klant');
   get(state.warehouses, input.warehouseId, 'Magazijn');
-  const lines = saleLines(state, customer, input.lines);
+  const lines = priceSaleLines(state, customer, input.lines);
   if (input.id) {
     const order = get(state.sales, input.id, 'Order');
     requireRule(order.status === 'concept', 'Alleen een conceptorder kan worden gewijzigd.');
+    requireRule(!order.quotationId, 'Deze order bevat de afspraken uit een geaccepteerde offerte.');
     Object.assign(order, { customerId: customer.id, warehouseId: input.warehouseId, lines });
     return order.id;
   }
-  const id = number(state, 'sale', 'SO', date);
+  const id = displayNumber(state, 'sale', 'SO', date);
   state.sales.push({ id, customerId: customer.id, warehouseId: input.warehouseId, date, status: 'concept', lines });
   return id;
 }
@@ -48,7 +49,7 @@ export function confirmSale(state, { id }, date) {
   if (order.status === 'bevestigd' || order.status === 'gepikt' || order.status === 'verzonden') return 'P-' + id;
   requireRule(order.status === 'concept', 'Alleen een conceptorder kan worden bevestigd.');
   const customer = get(state.customers, order.customerId, 'Klant');
-  const lines = saleLines(state, customer, order.lines);
+  const lines = order.quotationId ? order.lines : priceSaleLines(state, customer, order.lines);
   const shortage = lines.filter(line => stockOf(state, line.productId, order.warehouseId).available < line.quantity);
   requireRule(shortage.length === 0, 'Onvoldoende voorraad voor ' + shortage.map(line => {
     const available = stockOf(state, line.productId, order.warehouseId).available;
@@ -133,7 +134,7 @@ export function invoiceSale(state, { id }, date) {
   requireRule(order.status === 'verzonden', 'Verzend de order vóór het maken van een factuurconcept.');
   const existing = state.invoices.find(invoice => invoice.orderId === id);
   if (existing) return existing.id;
-  const invoiceId = number(state, 'invoice', 'FC', date);
+  const invoiceId = displayNumber(state, 'invoice', 'FC', date);
   state.invoices.push({ id: invoiceId, orderId: id, customerId: order.customerId, date, lines: structuredClone(order.lines) });
   return invoiceId;
 }
@@ -151,7 +152,7 @@ export function savePurchase(state, input, date) {
     Object.assign(order, { supplierId: supplier.id, warehouseId: input.warehouseId, lines });
     return order.id;
   }
-  const id = number(state, 'purchase', 'PO', date);
+  const id = displayNumber(state, 'purchase', 'PO', date);
   state.purchases.push({ id, supplierId: supplier.id, warehouseId: input.warehouseId, date, status: 'concept', lines });
   return id;
 }
@@ -175,7 +176,7 @@ export function receivePurchase(state, { id, lines }, date) {
     requireRule(line.received + input.amount <= line.quantity, 'De ontvangst overschrijdt het openstaande aantal.');
     return { line, locationId: location.id, amount: input.amount };
   });
-  const receiptId = number(state, 'receipt', 'ON', date);
+  const receiptId = displayNumber(state, 'receipt', 'ON', date);
   for (const { line, locationId, amount } of delivery) {
     movement(state, { productId: line.productId, locationId, delta: amount, type: 'Ontvangst', reference: id + ' / ' + receiptId, date });
     line.received += amount;

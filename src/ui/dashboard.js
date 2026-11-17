@@ -53,7 +53,8 @@ export function renderDashboard(state) {
     const product = state.products.find(item => item.id === row.id);
     return [link('artikelen', product.id, product.name) + '<small class="cell-sub">' + esc(product.sku) + '</small>', num(row.count), money(row.revenue)];
   });
-  return pageHead('Dashboard', 'Verkoop, voorraad en magazijn in één overzicht.', button('new-sale', 'Nieuwe verkooporder', 'primary')) +
+  return pageHead('Dashboard', 'Verkoop, voorraad en magazijn in één overzicht.',
+    link('presentatie', '', 'Open productdemo', 'button secondary') + button('new-sale', 'Nieuwe verkooporder', 'primary')) +
     '<div class="metric-grid">' + metrics.map(metric).join('') + '</div>' +
     '<div class="dashboard-grid">' +
     panel('Omzetontwikkeling', '<p class="panel-note">Verzonden orders per maand, exclusief btw.</p>' + chart(data.months), '<span class="chart-legend"><i></i> Omzet</span>') +

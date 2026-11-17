@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open de URL uit de terminal. Begin op Dashboard of volg de [demonstratiehandleiding](docs/DEMO.md). Gebruik **Demo herstellen** om lokale wijzigingen te wissen. Gebruik uitsluitend fictieve gegevens.
+Open de URL uit de terminal. Kies **Open productdemo** op het dashboard voor een ingevulde offerte en een aanvulscenario. De [demonstratiehandleiding](docs/DEMO.md) bevat de stappen en controlegetallen. Gebruik **Demo herstellen** om lokale wijzigingen te wissen. Gebruik uitsluitend fictieve gegevens.
 
 ## Verifiëren
 

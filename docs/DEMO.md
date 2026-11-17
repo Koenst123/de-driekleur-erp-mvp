@@ -2,6 +2,15 @@
 
 Gebruik dezelfde browser en URL gedurende de presentatie. Open de [startinstructies](../README.md) en kies in de navigatie **Demo herstellen** voordat je een scenario opnieuw doorloopt. Alle bedragen, relaties en voorraadstanden in de demo zijn fictief.
 
+## Presentatie in twee processen
+
+Open **Productdemo**. De twee kaarten leiden naar acties in de werkruimte.
+
+1. **Van klantvraag naar levering.** Kies **Start met een ingevulde offerte**. Controleer de klantprijs, 12 jerrycans, 6 emmers en € 1.524,60 inclusief btw. Sla op, breng uit en toon **Afdrukken / pdf**. Kies **Klantakkoord registreren**. Het verkoopconcept linkt terug naar de offerte en houdt de vastgelegde prijs. Bevestig de order en vervolg met stap 4 hieronder. Leg bij akkoord en bij verzending telkens de voorraadstanden naast elkaar.
+2. **Van voorraadtekort naar aanvulling.** Kies **Bekijk het aanvulvoorstel**, zoek `AWS-46-J20` en toon 2 beschikbaar, minimum 11, aanvuldoel 22 en het voorstel om 20 te bestellen. Maak het inkoopconcept. In de werkvoorraad kun je hetzelfde concept heropenen. Bevestig de bestelling en ontvang 2. Toon onder **Voorraad aanvullen** 4 beschikbaar, nog 18 in bestelling en een verwachte stand van 22. Alleen de 4 beschikbare verpakkingen kunnen nu voor verkoop worden gereserveerd.
+
+De offerte is een lokaal demonstratiedocument. De verkoper registreert het akkoord in de demo. De voorraadverwachting gebruikt het resterende aantal van bevestigde inkopen, zonder leverdata te voorspellen.
+
 ## 1. Een klant bestelt olie en vet
 
 1. Open **Dashboard** en noteer de omzet. Ga naar **Klanten & CRM** en zoek **Rijnland Machinebouw**.

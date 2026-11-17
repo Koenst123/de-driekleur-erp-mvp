@@ -1,6 +1,7 @@
 import { recentFirst } from '../domain/selectors.js';
 import { totals } from '../domain/orders.js';
 import { currencyInput } from './catalog.js';
+import { quotationsTable } from './quotations.js';
 import { esc, num, money, day, badge, button, table, sub, panel, pageHead, link, definition, field, input, option, options, select, textarea } from './components.js';
 
 export function partnersPage(state, id, kind, filters) {
@@ -18,7 +19,9 @@ export function partnersPage(state, id, kind, filters) {
     ['Plaats', esc(partner.city || '—')], ['Contactpersoon', esc(partner.contact || '—')], ['E-mail', esc(partner.email || '—')],
     ...(customer ? [] : [['Gemiddelde levertijd', num(partner.leadDays) + ' dagen · demo']]),
   ]) + '<p class="description">' + esc(partner.notes || 'Geen notities.') + '</p>');
-  const actions = button('edit-partner', 'Gegevens wijzigen', 'secondary') + (customer ? button('new-sale', 'Nieuwe verkooporder', 'primary') : button('new-purchase', 'Nieuwe inkooporder', 'primary'));
+  const actions = button('edit-partner', 'Gegevens wijzigen', 'secondary') + (customer ?
+    button('new-quotation', 'Nieuwe offerte') + button('new-sale', 'Nieuwe verkooporder', 'primary') :
+    button('new-purchase', 'Nieuwe inkooporder', 'primary'));
   const history = panel(customer ? 'Verkoopgeschiedenis' : 'Inkoophistorie', table(['Order', 'Datum', 'Status'], orders.map(order => [
     link(customer ? 'verkoop' : 'inkoop', order.id, order.id), day(order.date), badge(order.status),
   ])));
@@ -35,12 +38,14 @@ function customerPanels(state, partner) {
     return [link('artikelen', id, product.name) + '<small class="cell-sub">' + esc(product.sku) + '</small>', money(price),
       button('remove-price', 'Verwijder afspraak', 'quiet', 'data-id="' + esc(id) + '"')];
   });
+  const quotes = state.quotations.filter(row => row.customerId === partner.id);
   return '<div class="detail-grid">' +
     panel('Prijsafspraken', table(['Artikel', 'Afgesproken prijs', 'Actie'], prices), button('set-price', 'Prijsafspraak toevoegen')) +
     panel('CRM-verkoopkansen', table(['Verkoopkans', 'Fase', 'Actie'], partner.opportunities.map(item => [
       esc(item.title), badge(item.stage, item.stage === 'Gewonnen' ? 'green' : 'blue'),
       button('edit-opportunity', 'Wijzigen', 'quiet', 'data-id="' + esc(item.id) + '"'),
     ])), button('new-opportunity', 'Nieuwe verkoopkans')) + '</div>' +
+    panel('Offertehistorie', quotationsTable(state, quotes)) +
     panel('Factuurhistorie', table(['Factuurconcept', 'Datum', 'Totaal incl. btw'], state.invoices.filter(row => row.customerId === partner.id)
       .sort(recentFirst).map(row => [link('financieel', row.id, row.id), day(row.date), money(totals(row.lines).gross)])));
 }

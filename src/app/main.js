@@ -4,6 +4,8 @@ import { createAssistant } from './assistant.js';
 import { BusinessError } from '../domain/stock.js';
 import * as sales from '../domain/orders.js';
 import * as catalog from '../domain/catalog.js';
+import { saveQuotation, issueQuotation, acceptQuotation, declineQuotation } from '../domain/quotations.js';
+import { createReplenishmentDraft } from '../domain/replenishment.js';
 import { esc, button } from '../ui/components.js';
 import { icon } from '../ui/icons.js';
 import { renderDashboard } from '../ui/dashboard.js';
@@ -12,11 +14,15 @@ import { salesPage, purchasesPage, orderResults, orderEditor, updateEditor, read
 import { warehousePage, scanForm } from '../ui/warehouse.js';
 import { partnersPage, partnerResults, partnerForm, priceForm, opportunityForm } from '../ui/relations.js';
 import { financePage, documentsPage, documentsResults, documentForm, documentOptions, websitePage } from '../ui/office.js';
+import { quotationsPage, quotationEditor } from '../ui/quotations.js';
+import { replenishmentPage } from '../ui/replenishment.js';
+import { presentationPage, demoQuote } from '../ui/presentation.js';
 
 const navigation = [
-  { caption: 'Werkruimte', entries: [['dashboard', 'Dashboard', 'dashboard']] },
-  { caption: 'Operatie', entries: [['verkoop', 'Verkoop', 'sales'], ['inkoop', 'Inkoop', 'purchase'], ['artikelen', 'Artikelen', 'articles'],
-    ['voorraad', 'Voorraad', 'stock'], ['magazijn', 'Magazijn', 'warehouse']] },
+  { caption: 'Werkruimte', entries: [['dashboard', 'Dashboard', 'dashboard'], ['presentatie', 'Productdemo', 'spark']] },
+  { caption: 'Operatie', entries: [['offertes', 'Offertes', 'invoices'], ['verkoop', 'Verkoop', 'sales'], ['inkoop', 'Inkoop', 'purchase'],
+    ['artikelen', 'Artikelen', 'articles'], ['voorraad', 'Voorraad', 'stock'],
+    ['aanvullen', 'Voorraad aanvullen', 'trend'], ['magazijn', 'Magazijn', 'warehouse']] },
   { caption: 'Bedrijf', entries: [['klanten', 'Klanten & CRM', 'customers'], ['leveranciers', 'Leveranciers', 'suppliers'],
     ['financieel', 'Financieel', 'invoices'], ['documenten', 'Documenten', 'documents'], ['website', 'Website', 'globe']] },
 ];
@@ -38,8 +44,11 @@ let recognition;
 
 const views = {
   dashboard: renderDashboard,
+  presentatie: presentationPage,
+  offertes: quotationsPage,
   artikelen: productsPage,
   voorraad: stockPage,
+  aanvullen: replenishmentPage,
   verkoop: salesPage,
   inkoop: purchasesPage,
   magazijn: (state, id) => warehousePage(state, id, ui),
@@ -130,7 +139,17 @@ function editOrder(sale, order = {}) {
     }, action);
     go(page, id);
     notify('Concept opgeslagen.');
-  }, { editor: sale, label: 'Concept opslaan' });
+  }, { editor: sale ? 'sale' : 'purchase', label: 'Concept opslaan' });
+}
+
+function editQuotation(quote = {}) {
+  openModal(quote.id ? 'Conceptofferte wijzigen' : 'Nieuwe offerte', quotationEditor(store.state, quote), async (form, action) => {
+    const { partnerId, ...order } = readOrder(form);
+    const { reference, validUntil } = values(form);
+    const id = await store.dispatch(saveQuotation, { ...order, customerId: partnerId, id: quote.id, reference, validUntil }, action);
+    go('offertes', id);
+    notify('Offerteconcept opgeslagen.');
+  }, { editor: 'quotation', label: 'Offerte opslaan' });
 }
 
 function editProduct(product = {}) {
@@ -138,6 +157,7 @@ function editProduct(product = {}) {
     const data = values(form);
     const id = await store.dispatch(catalog.saveProduct, {
       ...data, id: product.id, content: Number(data.content), minimum: Number(data.minimum),
+      targetStock: data.targetStock === '' ? undefined : Number(data.targetStock),
       taxRate: Number(data.taxRate), salePrice: toCents(data.salePrice), purchasePrice: toCents(data.purchasePrice),
     }, action);
     go('artikelen', id);
@@ -224,6 +244,19 @@ function closeNav() {
 }
 
 const actions = {
+  'new-quotation': ({ page, id }) => editQuotation(page === 'klanten' ? { customerId: id } : {}),
+  'demo-quotation': () => editQuotation(demoQuote),
+  'edit-quotation': ({ state, id }) => editQuotation(state.quotations.find(row => row.id === id)),
+  'print-quotation': () => window.print(),
+  'issue-quotation': ({ id }) => commandModal('Offerte uitbrengen', 'Leg de prijsregels vast. Je kunt de offerte afdrukken of als pdf opslaan.', 'Uitbrengen',
+    issueQuotation, { id }, () => notify('Offerte uitgebracht.')),
+  'accept-quotation': ({ id }) => commandModal('Klantakkoord registreren', 'Bevestig dat de klant akkoord is. De offerte wordt gekoppeld aan één nieuwe verkooporder.', 'Akkoord vastleggen',
+    acceptQuotation, { id }, orderId => { go('verkoop', orderId); notify('Klantakkoord vastgelegd. Verkoopconcept aangemaakt.'); }),
+  'decline-quotation': ({ id }) => commandModal('Offerte afwijzen', 'Leg vast dat de klant deze offerte heeft afgewezen.', 'Afwijzing vastleggen',
+    declineQuotation, { id }, () => notify('Offerte afgewezen.'), true),
+  'replenish-product': ({ selected, warehouseId }) => commandModal('Inkoopconcept maken',
+    'Maak een concept bij de gekoppelde leverancier, op basis van de actuele aanvulbehoefte.', 'Concept maken',
+    createReplenishmentDraft, { productId: selected, warehouseId }, id => { go('inkoop', id); notify('Inkoopconcept geopend.'); }),
   'new-sale': ({ page, id }) => editOrder(true, page === 'klanten' ? { customerId: id } : {}),
   'new-purchase': ({ page, id }) => editOrder(false, page === 'leveranciers' ? { supplierId: id } : {}),
   'edit-sale': ({ state, id }) => editOrder(true, state.sales.find(row => row.id === id)),
@@ -314,7 +347,8 @@ document.addEventListener('click', event => {
     return;
   }
   const [page, id] = route();
-  actions[action]?.({ state: store.state, page, id, kind: page === 'klanten' ? 'customers' : 'suppliers', selected: trigger.dataset.id });
+  actions[action]?.({ state: store.state, page, id, kind: page === 'klanten' ? 'customers' : 'suppliers',
+    selected: trigger.dataset.id, warehouseId: trigger.dataset.warehouse });
 });
 
 modalForm.addEventListener('submit', async event => {

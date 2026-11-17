@@ -16,12 +16,15 @@ export function saveProduct(state, data) {
   get(state.locations, data.locationId, 'Locatie');
   requireRule(Number.isFinite(data.content) && data.content > 0 && data.content <= 10000 && ['L', 'kg', 'st'].includes(data.unit), 'Voer een geldige verpakkingsinhoud in.');
   requireRule([0, 900, 2100].includes(data.taxRate), 'Kies een geldige demo-btw-code.');
+  const minimum = quantity(data.minimum, true);
+  const targetStock = data.targetStock === undefined ? undefined : quantity(data.targetStock, true);
+  requireRule(targetStock === undefined || targetStock >= minimum, 'Vul aan tot minstens de minimumvoorraad.');
   const fields = {
     sku, barcode, name: text(data.name), brand: text(data.brand), category: text(data.category),
     description: text(data.description, 1200), grade: text(data.grade), unit: data.unit,
     packaging: text(data.packaging), content: data.content, purchasePrice: cents(data.purchasePrice),
     salePrice: cents(data.salePrice), taxRate: data.taxRate, supplierId: data.supplierId,
-    locationId: data.locationId, minimum: quantity(data.minimum, true), source: '', verifiedPack: false,
+    locationId: data.locationId, minimum, targetStock, source: '', verifiedPack: false,
   };
   if (data.id) {
     const existing = get(state.products, data.id, 'Artikel');

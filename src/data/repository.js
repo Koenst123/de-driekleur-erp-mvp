@@ -1,4 +1,5 @@
 import { createSeed } from './seed.js';
+import { upgradeWorkspace } from './workspace-version.js';
 import { requireRule } from '../domain/stock.js';
 
 const DB_NAME = 'driekleur-business-suite';
@@ -40,7 +41,7 @@ async function change(mutate) {
     request.onsuccess = () => {
       try {
         const previous = request.result;
-        const { state, result, write } = mutate(previous ?? createSeed());
+        const { state, result, write } = mutate(previous ? upgradeWorkspace(previous) : createSeed());
         if (!previous || write) store.put(state, KEY);
         response = { state, result };
       } catch (error) {
@@ -61,7 +62,7 @@ export const repository = {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    return existing ?? (await change(state => ({ state }))).state;
+    return existing ? upgradeWorkspace(existing) : (await change(state => ({ state }))).state;
   },
   execute({ actionId, generation, command, payload, date }) {
     return change(state => {

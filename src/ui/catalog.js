@@ -1,4 +1,5 @@
 import { stockOf } from '../domain/stock.js';
+import { defaultTarget } from '../domain/replenishment.js';
 import { recentFirst } from '../domain/selectors.js';
 import { movementsTable } from './dashboard.js';
 import { esc, num, money, badge, button, table, panel, pageHead, link, definition, field, input, option, options, select, textarea, packagingImage } from './components.js';
@@ -26,6 +27,7 @@ export function productsPage(state, id, filters) {
         ['Verpakking', esc(product.packaging + ' · ' + product.content + ' ' + product.unit) + (product.verifiedPack ? '' : ' <small class="inline-note">Demo</small>')],
         ['Verkoopprijs', money(product.salePrice)], ['Inkoopprijs', money(product.purchasePrice)],
         ['Btw-code', num(product.taxRate / 100) + '%'], ['Minimumvoorraad', num(product.minimum)],
+        ['Aanvullen tot', num(product.targetStock ?? defaultTarget(product.minimum))],
         ['Leverancier', link('leveranciers', supplier.id, supplier.name)], ['Voorkeurslocatie', esc(product.locationId)], ['Demobarcode', '<code>' + esc(product.barcode) + '</code>'],
       ]) + (product.description ? '<p class="description">' + esc(product.description) + '</p>' : '') +
       (product.source ? '<p class="description"><a class="text-link" target="_blank" rel="noopener noreferrer" href="' + esc(product.source) + '">Fabrikantinformatie ↗</a></p>' : '')) +
@@ -66,7 +68,8 @@ export function productResults(state, filters) {
 
 export function stockPage(state, id, filters) {
   const controls = link('voorraad', '', 'Voorraadstanden', 'button ' + (!id ? 'primary' : 'secondary')) +
-    link('voorraad', 'mutaties', 'Mutaties', 'button ' + (id ? 'primary' : 'secondary'));
+    link('voorraad', 'mutaties', 'Mutaties', 'button ' + (id ? 'primary' : 'secondary')) +
+    link('aanvullen', '', 'Voorraad aanvullen', 'button secondary');
   const header = pageHead('Voorraad', 'Fysieke voorraad, reserveringen en voorraadmutaties per locatie.', button('adjust-stock', 'Voorraad corrigeren', 'primary'));
   if (id === 'mutaties') return header + '<div class="subnav">' + controls + '</div>' +
     panel('Mutatieoverzicht', movementsTable(state, [...state.movements].sort(recentFirst)));
@@ -111,6 +114,7 @@ export function productForm(state, product = {}) {
     field('supplierId', 'Leverancier', select('supplierId', options(state.suppliers, product.supplierId))) +
     field('locationId', 'Voorkeurslocatie', select('locationId', locationOptions(state, product.locationId))) +
     field('minimum', 'Minimumvoorraad', input('minimum', product.minimum ?? 0, number)) +
+    field('targetStock', 'Aanvullen tot (optioneel)', input('targetStock', product.targetStock ?? '', 'type="number" min="0" step="1" max="100000"')) +
     field('description', 'Omschrijving', textarea('description', product.description, 'rows="2" maxlength="1200"')) + '</div>';
 }
 

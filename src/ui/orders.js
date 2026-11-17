@@ -32,7 +32,7 @@ export function salesPage(state, id, filters) {
   const pick = state.picks.find(row => row.orderId === id);
   const invoice = state.invoices.find(row => row.orderId === id);
   let actions = '';
-  if (order.status === 'concept') actions = button('edit-sale', 'Concept wijzigen') + button('confirm-sale', 'Order bevestigen', 'primary');
+  if (order.status === 'concept') actions = (order.quotationId ? '' : button('edit-sale', 'Concept wijzigen')) + button('confirm-sale', 'Order bevestigen', 'primary');
   if (order.status === 'bevestigd') actions = link('magazijn', pick.id, 'Open pickopdracht', 'button primary');
   if (order.status === 'gepikt') actions = link('magazijn', pick.id, 'Open pickopdracht', 'button secondary') + button('ship-sale', 'Verzending bevestigen', 'primary');
   if (order.status === 'verzonden') actions = invoice ? link('financieel', invoice.id, 'Bekijk factuurconcept', 'button primary') :
@@ -40,20 +40,22 @@ export function salesPage(state, id, filters) {
   if (['concept', 'bevestigd', 'gepikt'].includes(order.status)) actions += button('cancel-sale', 'Order annuleren', 'danger');
   return pageHead(id, customer.name + ' · Verkooporder', actions, link('verkoop', '', '‹ Verkoop', 'back')) +
     panel('Ordergegevens', definition([['Klant', link('klanten', customer.id, customer.name)],
-      ['Magazijn', esc(warehouse.name)], ['Aangemaakt', day(order.date)], ['Status', badge(order.status)]])) +
+      ['Magazijn', esc(warehouse.name)], ['Aangemaakt', day(order.date)], ['Status', badge(order.status)],
+      ...(order.quotationId ? [['Offerte', link('offertes', order.quotationId, order.quotationId)]] : [])])) +
     panel('Orderregels', salesLines(state, order, order.status === 'concept') + saleTotals(order.lines));
 }
 
 export function purchasesPage(state, id, filters) {
   const order = state.purchases.find(row => row.id === id);
-  if (!order) return pageHead('Inkoop', 'Inkooporders en goederenontvangsten.', button('new-purchase', 'Nieuwe inkooporder', 'primary')) +
+  if (!order) return pageHead('Inkoop', 'Inkooporders en goederenontvangsten.',
+    link('aanvullen', '', 'Voorraad aanvullen', 'button secondary') + button('new-purchase', 'Nieuwe inkooporder', 'primary')) +
     orderFilters(filters, ['concept', 'besteld', 'gedeeltelijk ontvangen', 'ontvangen']) +
     '<div id="filter-results">' + orderResults(state, filters, 'purchases') + '</div>';
   const supplier = state.suppliers.find(row => row.id === order.supplierId);
   const warehouse = state.warehouses.find(row => row.id === order.warehouseId);
-  let actions = '';
-  if (order.status === 'concept') actions = button('edit-purchase', 'Concept wijzigen') + button('confirm-purchase', 'Bestelling bevestigen', 'primary');
-  if (['besteld', 'gedeeltelijk ontvangen'].includes(order.status)) actions = button('receive-purchase', 'Ontvangst registreren', 'primary');
+  let actions = link('aanvullen', order.warehouseId, 'Voorraad aanvullen', 'button secondary');
+  if (order.status === 'concept') actions += button('edit-purchase', 'Concept wijzigen') + button('confirm-purchase', 'Bestelling bevestigen', 'primary');
+  if (['besteld', 'gedeeltelijk ontvangen'].includes(order.status)) actions += button('receive-purchase', 'Ontvangst registreren', 'primary');
   const receipts = state.receipts.filter(row => row.orderId === id);
   return pageHead(id, supplier.name + ' · Inkooporder', actions, link('inkoop', '', '‹ Inkoop', 'back')) +
     panel('Bestelgegevens', definition([['Leverancier', link('leveranciers', supplier.id, supplier.name)],
@@ -120,7 +122,8 @@ export function readOrder(form) {
   };
 }
 
-export function updateEditor(state, form, sale, action, index) {
+export function updateEditor(state, form, mode, action, index) {
+  const sale = mode !== 'purchase';
   const input = readOrder(form);
   const result = form.querySelector('[data-order-summary]');
   if (action === 'add-line' || action === 'remove-line' || action === 'partner' && !sale) {
@@ -140,7 +143,7 @@ export function updateEditor(state, form, sale, action, index) {
     return item && Number.isInteger(line.quantity) && line.quantity > 0 && line.quantity <= 100000 ?
       [{ ...line, sku: item.sku, price: customer?.prices[item.id] ?? item.salePrice, taxRate: item.taxRate }] : [];
   });
-  const shortages = lines.filter(line => stockOf(state, line.productId, input.warehouseId).available < line.quantity);
+  const shortages = mode === 'sale' ? lines.filter(line => stockOf(state, line.productId, input.warehouseId).available < line.quantity) : [];
   result.innerHTML = (shortages.length ? '<p class="inline-warning">Onvoldoende voorraad voor ' +
     esc(shortages.map(line => line.sku).join(', ')) + '.</p>' : '') + saleTotals(lines);
 }

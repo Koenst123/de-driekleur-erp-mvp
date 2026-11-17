@@ -14,9 +14,10 @@ Voor een toekomstige HTTP-adapter worden de benoemde domeincommando’s verzoeke
 | Klant en leverancier | Contact en notities. Een klant heeft prijsafspraken per SKU en verkoopkansen. Een leverancier heeft demo-levertijd en gekoppelde artikelen. |
 | Magazijn, locatie, voorraadstand | Een locatie hoort bij één magazijn. Een voorraadstand koppelt artikel en locatie aan fysieke en gereserveerde aantallen. Beschikbaar is het verschil. |
 | Verkooporder en pick | Order hoort bij één klant en magazijn. Bevestigde regels bewaren prijzen en btw. Eén pick per order bewaart verdeling over locaties, vereist en gepickt aantal. |
+| Offerte | Klant, magazijn, geldigheid volgens Nederlandse datum, referentie, gelijktijdig vastgelegde prijsregels en akkoordmoment. Een uitgebrachte offerte kan via klantakkoord maximaal één verkoopconcept opleveren. Het verkoopconcept behoudt de offerteregels. |
 | Inkooporder en ontvangst | Order hoort bij één leverancier en magazijn. Open aantal per regel is besteld minus ontvangen. Iedere ontvangst heeft een eigen ID met aantallen en locaties. |
 | Voorraadmutatie | Fysieke delta per SKU en locatie met datum, type, herkomst en eventueel reden. Beginstanden ontstaan eveneens uit mutaties. |
 | Factuurconcept | Eén concept per verzonden verkooporder. Bedragen volgen uit gekopieerde regels en afgeronde btw per regel. |
 | Document en website | Documentmetadata koppelt een lokaal voorbeeldbestand aan een artikel, klant of order. De website heeft drie bewerkbare tekstvelden. |
 
-Schema- en demaversie beginnen op 1. De bestaande statische demo bewaarde geen records die moeten worden gemigreerd. IndexedDB en BroadcastChannel behoren tot de lokale browseromgeving. Server-side autorisatie, multi-user transactiebeheer en productieve beveiliging vereisen een backend.
+Het IndexedDB-schema blijft versie 1. Werkruimteversie 2 initialiseert het nieuwe offerteoverzicht en de teller, met behoud van bestaande orders, standen en instellingen. Het optionele aanvuldoel valt terug op tweemaal het minimum, met een bovengrens van 100.000. IndexedDB en BroadcastChannel behoren tot de lokale browseromgeving. Server-side autorisatie, multi-user transactiebeheer en productieve beveiliging vereisen een backend.

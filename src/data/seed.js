@@ -1,7 +1,7 @@
 import { movement } from '../domain/stock.js';
 import { saveSale, confirmSale, cancelSale, recordPick, finishPick, shipSale, invoiceSale, savePurchase, confirmPurchase, receivePurchase } from '../domain/orders.js';
 
-export const SEED_VERSION = 1;
+export const SEED_VERSION = 2;
 export const defaultWebsite = {
   heading: 'Oliën, vetten en smeermiddelen voor dagelijks vakwerk.',
   introduction: 'Bekijk een selectie hydrauliekoliën, lagervetten en tandwieloliën voor werkplaatsen en industriële toepassingen.',
@@ -38,8 +38,8 @@ const customerNames = ['Rijnland Machinebouw', 'Werkplaats De Kade', 'Veluwe Tec
 export function createSeed() {
   const state = {
     seedVersion: SEED_VERSION, revision: 0, generation: 0, actions: {},
-    counters: { product: 60, customers: 20, suppliers: 10, opportunity: 2, sale: 0, purchase: 0, receipt: 0, invoice: 0, movement: 0, document: 3 },
-    products: [], customers: [], suppliers: [], locations: [], balances: [], sales: [], picks: [],
+    counters: { product: 60, customers: 20, suppliers: 10, opportunity: 2, sale: 0, quotation: 0, purchase: 0, receipt: 0, invoice: 0, movement: 0, document: 3 },
+    products: [], customers: [], suppliers: [], locations: [], balances: [], sales: [], quotations: [], picks: [],
     purchases: [], receipts: [], invoices: [], movements: [], documents: [],
     warehouses: [{ id: 'A', name: 'Magazijn A · Ede' }, { id: 'B', name: 'Magazijn B · Reserve' }],
     website: { ...defaultWebsite },
