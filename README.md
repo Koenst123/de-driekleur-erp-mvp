@@ -1,17 +1,28 @@
-# De Driekleur ERP / voorraadprototype
+# De Driekleur Business Suite
 
-Standalone HTML-demonstratie voor een conceptueel voorraad- en magazijnsysteem.
+Interactief Nederlandstalig ERP-prototype voor een groothandel in oliën, vetten en smeermiddelen. De demonstratie omvat verkoop, voorraad, inkoop, magazijn, CRM, documenten, factuurconcepten en een lokale websitepreview.
 
-## Demo openen
+## Starten
 
-Na het inschakelen van GitHub Pages is de preview bereikbaar op:
+Vereist Node.js 22.12 of hoger.
 
-https://koenst123.github.io/de-driekleur-erp-mvp/
+```sh
+npm ci
+npm run dev
+```
 
-Ga in de repository naar **Settings → Pages** en kies bij **Build and deployment** voor **Deploy from a branch**, branch **main**, map **/(root)**. De eerste publicatie kan enkele minuten duren.
+Open de URL uit de terminal. Begin op Dashboard of volg de [demonstratiehandleiding](docs/DEMO.md). Gebruik **Demo herstellen** om lokale wijzigingen te wissen. Gebruik uitsluitend fictieve gegevens.
 
-## Prototype-notitie
+## Verifiëren
 
-Alle voorraadstanden, locaties, orders, klantnamen en rapportages zijn fictief. Dit is een statische HTML-demo zonder database, accountbeheer, echte AI, telefonie of barcodekoppeling. Het zoekveld voor barcodes simuleert alleen handmatige invoer.
+```sh
+npm test
+npx playwright install chromium
+npm run e2e
+npm run build
+npm run preview
+```
 
-Logo, merkstijl en productnamen zijn ter herkenning gebaseerd op de [website van De Driekleur Ede](https://www.dedriekleurede.nl/). De demo toont geen actuele bedrijfs- of voorraadgegevens.
+De statische build staat in `dist/`. Serveer die via HTTP. De websitepreview gebruikt dezelfde lokale opslag wanneer zij vanaf dezelfde origin wordt geopend. Er is geen externe service vereist voor de tekstworkflow.
+
+[Documentatie-index](docs/README.md) · [Testresultaten](docs/TESTRESULTATEN.md) · [Beperkingen en productieroadmap](docs/ROADMAP.md)

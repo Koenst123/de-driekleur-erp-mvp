@@ -1,0 +1,6 @@
+VOORBEELD ARTIKELBLAD
+De Driekleur Business Suite · demonstratie
+
+Artikel: hydrauliekolie, jerrycan
+Dit document demonstreert een koppeling tussen een artikel en een bestand.
+Fabrikantinformatie is bij het product gelinkt wanneer beschikbaar.
