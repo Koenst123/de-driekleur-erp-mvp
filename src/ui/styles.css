@@ -229,6 +229,17 @@ td code, .inline-note code, dd code { color: #274971; white-space: nowrap; }
 .scenario-card li + li { margin-top: 5px; }
 .scenario-card > div { margin-top: auto; }
 .quote-note { font-size: 12px; color: var(--muted); padding: 0 2px; }
+.origin-note { color: var(--muted); margin: 0 2px 15px; font-size: 12px; }
+.workbench-actions { display: flex; flex-wrap: wrap; gap: 9px; padding: 0 17px 16px; }
+.workbench-actions .button { min-height: 44px; }
+.test-workbench .panel-note { margin: 0 17px 16px; }
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.module-grid .panel { margin: 0; }
+.module-copy { padding: 0 17px 17px; }
+.module-copy h3 { font-size: 12px; margin: 2px 0 5px; color: var(--ink); }
+.module-copy p { color: var(--muted); line-height: 1.55; }
+.module-copy .actions { margin: 12px 0 18px; justify-content: start; }
+.module-copy .actions + h3 { padding-top: 12px; border-top: 1px solid var(--line); }
 .print-heading { display: none; }
 
 @media print {

@@ -13,6 +13,8 @@ npm run dev
 
 Open de URL uit de terminal. Kies **Open productdemo** op het dashboard voor een ingevulde offerte en een aanvulscenario. De [demonstratiehandleiding](docs/DEMO.md) bevat de stappen en controlegetallen. Gebruik **Demo herstellen** om lokale wijzigingen te wissen. Gebruik uitsluitend fictieve gegevens.
 
+In **Productdemo** staan directe acties voor verkoop, inkoop, artikelen en voorraad. **Modules & mogelijkheden** toont de beschikbare functies en het vervolgwerk. Zie [alle testbare mogelijkheden](docs/MODULES.md).
+
 ## Verifiëren
 
 ```sh

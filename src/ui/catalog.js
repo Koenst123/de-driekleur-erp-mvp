@@ -24,7 +24,8 @@ export function productsPage(state, id, filters) {
     const rows = state.balances.filter(row => row.productId === id).map(row => [
       esc(row.locationId), num(row.physical), num(row.reserved), num(row.physical - row.reserved),
     ]);
-    return pageHead(product.name, product.sku + ' · ' + product.category, button('edit-product', 'Artikel wijzigen', 'primary'), link('artikelen', '', '‹ Artikelen', 'back')) +
+    return pageHead(product.name, product.sku + ' · ' + product.category,
+      button('transfer-product', 'Voorraad verplaatsen') + button('edit-product', 'Artikel wijzigen', 'primary'), link('artikelen', '', '‹ Artikelen', 'back')) +
       '<div class="detail-grid">' + panel('Artikelgegevens', definition([
         ['Merk', esc(product.brand || '—')], ['Klasse', esc(product.grade || '—')],
         ['Verpakking', esc(product.packaging + ' · ' + product.content + ' ' + product.unit) + (product.verifiedPack ? '' : ' <small class="inline-note">Demo</small>')],
@@ -40,7 +41,8 @@ export function productsPage(state, id, filters) {
       panel('Voorraadgeschiedenis', movementsTable(state, state.movements.filter(row => row.productId === id).sort(recentFirst), false));
   }
   const categories = [...new Set(state.products.map(row => row.category))].sort();
-  return pageHead('Artikelen', 'Beheer assortiment, prijzen en verpakkingen.', button('new-product', 'Nieuw artikel', 'primary')) +
+  return pageHead('Artikelen', 'Beheer assortiment, prijzen en verpakkingen.',
+    button('export-csv', 'Export alles (CSV)') + button('new-product', 'Nieuw artikel', 'primary')) +
     filterForm([
       field('search', 'Zoeken', input('search', filters.search, 'type="search" placeholder="SKU, naam of merk"')),
       field('category', 'Categorie', select('category', option('', 'Alle categorieën', filters.category) + categories.map(item => option(item, item, filters.category)).join(''))),
@@ -77,7 +79,9 @@ export function stockPage(state, id, filters) {
   const controls = link('voorraad', '', 'Voorraadstanden', 'button ' + (!id ? 'primary' : 'secondary')) +
     link('voorraad', 'mutaties', 'Mutaties', 'button ' + (id ? 'primary' : 'secondary')) +
     link('aanvullen', '', 'Voorraad aanvullen', 'button secondary');
-  const header = pageHead('Voorraad', 'Fysieke voorraad, reserveringen en voorraadmutaties per locatie.', button('adjust-stock', 'Voorraad corrigeren', 'primary'));
+  const header = pageHead('Voorraad', 'Fysieke voorraad, reserveringen en voorraadmutaties per locatie.',
+    button('export-csv', 'Export alles (CSV)') + link('verplaatsingen', '', 'Verplaatsingen', 'button secondary') +
+    button('adjust-stock', 'Voorraad corrigeren', 'primary'));
   if (id === 'mutaties') return header + '<div class="subnav">' + controls + '</div>' +
     panel('Mutatieoverzicht', movementsTable(state, [...state.movements].sort(recentFirst)));
   return header + '<div class="subnav">' + controls + '</div>' +

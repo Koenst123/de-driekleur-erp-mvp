@@ -52,6 +52,7 @@ export function renderDashboard(state) {
     return [link('artikelen', product.id, product.name) + '<small class="cell-sub">' + esc(product.sku) + '</small>', num(row.count), money(row.revenue)];
   });
   return pageHead('Dashboard', 'Verkoop, voorraad en magazijn in één overzicht.',
+    link('modules', '', 'Modules & mogelijkheden', 'button secondary') +
     link('presentatie', '', 'Open productdemo', 'button secondary') + button('new-sale', 'Nieuwe verkooporder', 'primary')) +
     '<div class="metric-grid">' + metrics.map(metric).join('') + '</div>' +
     '<div class="dashboard-grid">' +

@@ -109,6 +109,56 @@ test('verkoop van 12 jerrycans en 6 emmers, assistent, verzending en factuur', a
   expect(errors).toEqual([]);
 });
 
+test('magazijnverplaatsing, klantretour, herhaalorder en CSV zijn uitvoerbaar', async ({ page }, testInfo) => {
+  test.setTimeout(45000);
+  await ui(page).getByRole('link', { name: 'Open productdemo' }).click();
+  await ui(page).getByRole('button', { name: 'Voorraad verplaatsen', exact: true }).click();
+  await dialog(page).getByRole('combobox', { name: 'Artikel', exact: true }).selectOption('TEL-46-J20');
+  await dialog(page).getByLabel('Van locatie').selectOption('A-03-02');
+  await dialog(page).getByLabel('Naar locatie').selectOption('B-03-02');
+  await dialog(page).getByLabel('Aantal verpakkingen').fill('4');
+  await dialog(page).getByLabel('Reden', { exact: true }).fill('Voorraad verdelen voor test');
+  await modalButton(page, 'Verplaatsing boeken').click();
+  await expect(ui(page).getByRole('heading', { name: 'Verplaatsingen', exact: true })).toBeVisible();
+  await expect(ui(page).getByRole('row').filter({ hasText: 'Voorraad verdelen voor test' })).toContainText('MV-');
+  let state = await workspace(page);
+  expect(stock(state, 'TEL-46-J20')).toEqual([20, 0, 20]);
+  expect(state.balances.find(row => row.productId === 'TEL-46-J20' && row.locationId === 'B-03-02').physical).toBe(22);
+  await page.reload();
+  await expect(ui(page).getByRole('row').filter({ hasText: 'Voorraad verdelen voor test' })).toBeVisible();
+
+  state = await workspace(page);
+  const shipped = state.sales.find(order => order.status === 'verzonden' && order.lines[0].quantity > 1);
+  const product = state.products.find(row => row.id === shipped.lines[0].productId);
+  const physical = state.balances.filter(row => row.productId === product.id).reduce((sum, row) => sum + row.physical, 0);
+  await page.goto('/#verkoop/' + shipped.id);
+  await ui(page).getByRole('button', { name: 'Retour ontvangen', exact: true }).click();
+  await dialog(page).getByLabel('Retourreden').fill('Ongebruikte verpakking terug');
+  await dialog(page).getByRole('group').first().getByLabel('Retouraantal').fill('1');
+  await modalButton(page, 'Retour boeken').click();
+  await expect(ui(page).getByRole('row').filter({ hasText: 'Ongebruikte verpakking terug' })).toContainText('RT-');
+  state = await workspace(page);
+  expect(state.balances.filter(row => row.productId === product.id).reduce((sum, row) => sum + row.physical, 0)).toBe(physical + 1);
+  await confirm(page, 'Herhaalorder maken', 'Herhaalorder maken');
+  await expect(ui(page).getByRole('heading', { name: /^SO-/ })).toBeVisible();
+  await expect(ui(page).getByText('Herhaalorder van', { exact: false })).toBeVisible();
+  const repeat = (await workspace(page)).sales.at(-1);
+  expect(repeat.sourceOrderId).toBe(shipped.id);
+  expect(repeat.status).toBe('concept');
+
+  await navigate(page, 'Artikelen');
+  const downloadPromise = page.waitForEvent('download');
+  await ui(page).getByRole('button', { name: 'Export alles (CSV)', exact: true }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('driekleur-artikelen.csv');
+  expect(await download.failure()).toBeNull();
+
+  await navigate(page, 'Modules & mogelijkheden');
+  await expect(ui(page).getByRole('heading', { name: 'Financieel', exact: true })).toBeVisible();
+  await expect(ui(page)).toContainText('Grootboek');
+  await page.screenshot({ path: testInfo.outputPath('modules.png'), animations: 'disabled' });
+});
+
 test('deelontvangsten vullen een voorraadtekort aan zonder deelreservering', async ({ page }) => {
   await ui(page).getByRole('button', { name: 'Nieuwe verkooporder' }).click();
   await labelAmount(page, 'Klant').selectOption('K-1');

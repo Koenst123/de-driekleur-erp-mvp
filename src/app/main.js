@@ -6,6 +6,8 @@ import * as sales from '../domain/orders.js';
 import * as catalog from '../domain/catalog.js';
 import { saveQuotation, issueQuotation, acceptQuotation, declineQuotation } from '../domain/quotations.js';
 import { createReplenishmentDraft } from '../domain/replenishment.js';
+import { duplicateSale, receiveReturn, transferStock } from '../domain/logistics.js';
+import { downloadCsv } from './csv.js';
 import { esc, button } from '../ui/components.js';
 import { icon } from '../ui/icons.js';
 import { renderDashboard } from '../ui/dashboard.js';
@@ -17,12 +19,15 @@ import { financePage, documentsPage, documentsResults, documentForm, documentOpt
 import { quotationsPage, quotationEditor } from '../ui/quotations.js';
 import { replenishmentPage } from '../ui/replenishment.js';
 import { presentationPage, demoQuote } from '../ui/presentation.js';
+import { modulesPage } from '../ui/module-overview.js';
+import { transfersPage, transferForm, updateTransferForm, returnForm, readReturn } from '../ui/logistics.js';
 
 const navigation = [
-  { caption: 'Werkruimte', entries: [['dashboard', 'Dashboard', 'dashboard'], ['presentatie', 'Productdemo', 'spark']] },
+  { caption: 'Werkruimte', entries: [['dashboard', 'Dashboard', 'dashboard'], ['presentatie', 'Productdemo', 'spark'],
+    ['modules', 'Modules & mogelijkheden', 'articles']] },
   { caption: 'Operatie', entries: [['offertes', 'Offertes', 'invoices'], ['verkoop', 'Verkoop', 'sales'], ['inkoop', 'Inkoop', 'purchase'],
     ['artikelen', 'Artikelen', 'articles'], ['voorraad', 'Voorraad', 'stock'],
-    ['aanvullen', 'Voorraad aanvullen', 'trend'], ['magazijn', 'Magazijn', 'warehouse']] },
+    ['aanvullen', 'Voorraad aanvullen', 'trend'], ['verplaatsingen', 'Verplaatsingen', 'suppliers'], ['magazijn', 'Magazijn', 'warehouse']] },
   { caption: 'Bedrijf', entries: [['klanten', 'Klanten & CRM', 'customers'], ['leveranciers', 'Leveranciers', 'suppliers'],
     ['financieel', 'Financieel', 'invoices'], ['documenten', 'Documenten', 'documents'], ['website', 'Website', 'globe']] },
 ];
@@ -45,6 +50,8 @@ let recognition;
 const views = {
   dashboard: renderDashboard,
   presentatie: presentationPage,
+  modules: modulesPage,
+  verplaatsingen: transfersPage,
   offertes: quotationsPage,
   artikelen: productsPage,
   voorraad: stockPage,
@@ -152,6 +159,17 @@ function editQuotation(quote = {}) {
   }, { editor: 'quotation', label: 'Offerte opslaan' });
 }
 
+function openTransfer(productId) {
+  openModal('Voorraad verplaatsen', transferForm(store.state, productId), async (form, action) => {
+    const data = values(form);
+    await store.dispatch(transferStock, { ...data, amount: Number(data.amount),
+      expectedPhysical: ui.modal.config.expectedPhysical }, action);
+    go('verplaatsingen');
+    notify('Verplaatsing geboekt op beide locaties.');
+  }, { label: 'Verplaatsing boeken', transfer: true });
+  ui.modal.config.expectedPhysical = updateTransferForm(store.state, modalForm);
+}
+
 function editProduct(product = {}) {
   openModal(product.id ? 'Artikel wijzigen' : 'Nieuw artikel', productForm(store.state, product), async (form, action) => {
     const data = values(form);
@@ -244,6 +262,17 @@ function closeNav() {
 }
 
 const actions = {
+  'export-csv': ({ state, page }) => downloadCsv(state, page),
+  'new-transfer': () => openTransfer(),
+  'transfer-product': ({ id }) => openTransfer(id),
+  'duplicate-sale': ({ id }) => commandModal('Herhaalorder maken',
+    'Maak een nieuw verkoopconcept met dezelfde artikelen en aantallen, tegen de actuele klantprijzen.', 'Herhaalorder maken',
+    duplicateSale, { id }, orderId => { go('verkoop', orderId); notify('Herhaalorder aangemaakt. Controleer de nieuwe prijzen en voorraad.'); }),
+  'return-sale': ({ state, id }) => openModal('Retour ontvangen',
+    returnForm(state, state.sales.find(row => row.id === id)), async (form, action) => {
+      await store.dispatch(receiveReturn, { id, ...readReturn(form) }, action);
+      notify('Retour in voorraad ontvangen.');
+    }, { label: 'Retour boeken' }),
   'new-quotation': ({ page, id }) => editQuotation(page === 'klanten' ? { customerId: id } : {}),
   'demo-quotation': ({ state }) => editQuotation(demoQuote(state)),
   'edit-quotation': ({ state, id }) => editQuotation(state.quotations.find(row => row.id === id)),
@@ -385,6 +414,13 @@ modalForm.addEventListener('change', event => {
   }
   if (event.target.name === 'targetKind' && ui.modal?.config.document) {
     modalForm.elements.targetId.innerHTML = documentOptions(store.state, event.target.value);
+  }
+  if (ui.modal?.config.transfer) {
+    if (event.target.name === 'productId') {
+      const product = store.state.products.find(row => row.id === event.target.value);
+      modalForm.elements.sourceId.value = product.locationId;
+    }
+    ui.modal.config.expectedPhysical = updateTransferForm(store.state, modalForm);
   }
 });
 

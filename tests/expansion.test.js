@@ -56,7 +56,7 @@ describe('Offertes', () => {
     state.website.heading = 'Eigen werkruimte';
     const sales = structuredClone(state.sales);
     const upgraded = upgradeWorkspace(state);
-    expect(upgraded).toMatchObject({ seedVersion: 3, quotations: [], sales, website: { heading: 'Eigen werkruimte' } });
+    expect(upgraded).toMatchObject({ seedVersion: 4, quotations: [], sales, website: { heading: 'Eigen werkruimte' }, transfers: [], returns: [] });
     expect(upgraded.products).toHaveLength(66);
     expect(stockOf(upgraded, shortage, 'A').available).toBe(2);
     expect(stockOf(upgraded, 'MOBIL-XHP222-E18', 'A').available).toBe(12);

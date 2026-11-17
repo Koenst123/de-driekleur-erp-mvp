@@ -1,8 +1,9 @@
 import { movement } from '../domain/stock.js';
 import { addOfficialProducts } from './official-catalog.js';
+import { saveQuotation, issueQuotation } from '../domain/quotations.js';
 import { saveSale, confirmSale, cancelSale, recordPick, finishPick, shipSale, invoiceSale, savePurchase, confirmPurchase, receivePurchase } from '../domain/orders.js';
 
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 4;
 export const defaultWebsite = {
   heading: 'Oliën, vetten en smeermiddelen voor dagelijks vakwerk.',
   introduction: 'Bekijk een selectie hydrauliekoliën, lagervetten en tandwieloliën voor werkplaatsen en industriële toepassingen.',
@@ -39,9 +40,9 @@ const customerNames = ['Rijnland Machinebouw', 'Werkplaats De Kade', 'Veluwe Tec
 export function createSeed() {
   const state = {
     seedVersion: SEED_VERSION, revision: 0, generation: 0, actions: {},
-    counters: { product: 60, customers: 20, suppliers: 10, opportunity: 2, sale: 0, quotation: 0, purchase: 0, receipt: 0, invoice: 0, movement: 0, document: 3 },
+    counters: { product: 60, customers: 20, suppliers: 10, opportunity: 2, sale: 0, quotation: 0, purchase: 0, receipt: 0, invoice: 0, movement: 0, document: 3, transfer: 0, return: 0 },
     products: [], customers: [], suppliers: [], locations: [], balances: [], sales: [], quotations: [], picks: [],
-    purchases: [], receipts: [], invoices: [], movements: [], documents: [],
+    purchases: [], receipts: [], invoices: [], movements: [], documents: [], transfers: [], returns: [],
     warehouses: [{ id: 'A', name: 'Magazijn A · Ede' }, { id: 'B', name: 'Magazijn B · Reserve' }],
     website: { ...defaultWebsite },
   };
@@ -138,5 +139,15 @@ export function createSeed() {
     { id: 'D-3', title: 'Voorbeeld verzendbon', category: 'Order', targetKind: 'sales', targetId: state.sales[0].id, sample: 'order', date: opening },
   ];
   addOfficialProducts(state);
+  const quotes = [
+    { customerId: 'K-1', reference: 'Onderhoudsbestelling', lines: [{ productId: hydraulic.id, quantity: 12 }, { productId: 'MOBIL-XHP222-E18', quantity: 6 }] },
+    { customerId: 'K-4', reference: 'Hydraulisch onderhoud', lines: [{ productId: 'DTE-EX46-J20', quantity: 8 }] },
+    { customerId: 'K-6', reference: 'Werkplaatsvoorraad', lines: [{ productId: 'QUARTZ-ECS-J05', quantity: 4 }] },
+  ];
+  quotes.forEach((quote, index) => {
+    const date = '2026-11-16T10:00:00.000Z';
+    const id = saveQuotation(state, { ...quote, warehouseId: 'A', validUntil: '2026-12-31' }, date);
+    if (index < 2) issueQuotation(state, { id }, date);
+  });
   return state;
 }

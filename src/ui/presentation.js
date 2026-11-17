@@ -18,6 +18,17 @@ export function presentationPage(state) {
   const oil = demoProduct(state, 'DTE-EX46-J20', 'AWS-46-J20');
   const grease = demoProduct(state, 'MOBIL-XHP222-E18', 'SKF-LGMT2-E18');
   const available = stockOf(state, oil.id, 'A').available;
+  const nextPick = state.picks.filter(row => row.status === 'open')
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id))[0];
+  const shipped = [...state.sales].reverse().find(row => row.status === 'verzonden');
+  const tasks = [
+    ['Offerte invullen', 'demo-quotation'],
+    ['Verkooporder maken', 'new-sale'],
+    ['Inkooporder maken', 'new-purchase'],
+    ['Artikel toevoegen', 'new-product'],
+    ['Voorraad verplaatsen', 'new-transfer'],
+    ['Voorraad corrigeren', 'adjust-stock'],
+  ];
   const scenarios = [
     { symbol: 'sales', tone: 'blue', title: 'Van klantvraag naar levering',
       copy: '12 jerrycans Shell Tellus S2 MX 46 en 6 emmers ' + grease.name + ' voor Rijnland Machinebouw.',
@@ -30,6 +41,12 @@ export function presentationPage(state) {
   ];
   return pageHead('Productdemo', 'Kies een proces en voer het uit met de opgeslagen demodata.',
     button('reset', 'Demo herstellen', 'secondary')) +
+    '<section class="panel test-workbench"><div class="panel-head"><h2>Zelf werken met de demo</h2>' +
+      link('modules', '', 'Bekijk alle mogelijkheden') + '</div><div class="workbench-actions">' +
+      tasks.map(([label, action]) => button(action, label)).join('') +
+      (nextPick ? link('magazijn', nextPick.id, 'Openstaande pick testen', 'button secondary') : '') +
+      (shipped ? link('verkoop', shipped.id, 'Retour op levering testen', 'button secondary') : '') +
+      '</div><p class="panel-note">Elke actie schrijft naar jouw lokale demogegevens. Herstel de demo om opnieuw te beginnen.</p></section>' +
     '<div class="detail-grid">' + scenarios.map(row => '<section class="panel scenario-card">' +
       '<span class="metric-icon ' + esc(row.tone) + '">' + icon(row.symbol) + '</span><h2>' + esc(row.title) +
       '</h2><p>' + esc(row.copy) + '</p><ol>' + row.steps.map(step => '<li>' + esc(step) + '</li>').join('') +

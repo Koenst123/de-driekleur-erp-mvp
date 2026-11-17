@@ -10,7 +10,7 @@ export function partnersPage(state, id, kind, filters) {
   const title = customer ? 'Klanten' : 'Leveranciers';
   const partner = state[kind].find(row => row.id === id);
   if (!partner) return pageHead(title, customer ? 'Klantgegevens, prijsafspraken en verkoopkansen.' : 'Leveranciersgegevens, artikelen en inkoophistorie.',
-    button('new-partner', customer ? 'Nieuwe klant' : 'Nieuwe leverancier', 'primary')) +
+    button('export-csv', 'Export alles (CSV)') + button('new-partner', customer ? 'Nieuwe klant' : 'Nieuwe leverancier', 'primary')) +
     '<form class="filters" data-filter>' + field('search', 'Zoeken', input('search', filters.search, 'type="search" placeholder="Bedrijf, contact of plaats"')) +
     '</form><div id="filter-results">' + partnerResults(state, filters, kind) + '</div>';
 

@@ -1,6 +1,8 @@
 import { totals } from '../domain/orders.js';
 import { stockOf } from '../domain/stock.js';
 import { recentFirst } from '../domain/selectors.js';
+import { returnedQuantity } from '../domain/logistics.js';
+import { returnsPanel } from './logistics.js';
 import { locationOptions } from './catalog.js';
 import { esc, num, money, day, badge, button, table, panel, pageHead, link, definition, field, input, option, options, select } from './components.js';
 
@@ -24,7 +26,8 @@ export function salesLines(state, order, availability = false) {
 
 export function salesPage(state, id, filters) {
   const order = state.sales.find(row => row.id === id);
-  if (!order) return pageHead('Verkoop', 'Verkooporders van concept tot verzending.', button('new-sale', 'Nieuwe verkooporder', 'primary')) +
+  if (!order) return pageHead('Verkoop', 'Verkooporders van concept tot verzending.',
+    button('export-csv', 'Export alles (CSV)') + button('new-sale', 'Nieuwe verkooporder', 'primary')) +
     orderFilters(filters, ['concept', 'bevestigd', 'gepikt', 'verzonden', 'geannuleerd']) +
     '<div id="filter-results">' + orderResults(state, filters, 'sales') + '</div>';
   const customer = state.customers.find(row => row.id === order.customerId);
@@ -38,17 +41,23 @@ export function salesPage(state, id, filters) {
   if (order.status === 'verzonden') actions = invoice ? link('financieel', invoice.id, 'Bekijk factuurconcept', 'button primary') :
     button('invoice-sale', 'Factuurconcept genereren', 'primary');
   if (['concept', 'bevestigd', 'gepikt'].includes(order.status)) actions += button('cancel-sale', 'Order annuleren', 'danger');
+  actions += button('duplicate-sale', 'Herhaalorder maken');
+  if (order.status === 'verzonden' && order.lines.some(line => returnedQuantity(state, id, line.productId) < line.quantity)) {
+    actions += button('return-sale', 'Retour ontvangen');
+  }
   return pageHead(id, customer.name + ' · Verkooporder', actions, link('verkoop', '', '‹ Verkoop', 'back')) +
     panel('Ordergegevens', definition([['Klant', link('klanten', customer.id, customer.name)],
       ['Magazijn', esc(warehouse.name)], ['Aangemaakt', day(order.date)], ['Status', badge(order.status)],
       ...(order.quotationId ? [['Offerte', link('offertes', order.quotationId, order.quotationId)]] : [])])) +
-    panel('Orderregels', salesLines(state, order, order.status === 'concept') + saleTotals(order.lines));
+    (order.sourceOrderId ? '<p class="origin-note">Herhaalorder van ' + link('verkoop', order.sourceOrderId, order.sourceOrderId) + '</p>' : '') +
+    panel('Orderregels', salesLines(state, order, order.status === 'concept') + saleTotals(order.lines)) +
+    (order.status === 'verzonden' ? returnsPanel(state, order) : '');
 }
 
 export function purchasesPage(state, id, filters) {
   const order = state.purchases.find(row => row.id === id);
   if (!order) return pageHead('Inkoop', 'Inkooporders en goederenontvangsten.',
-    link('aanvullen', '', 'Voorraad aanvullen', 'button secondary') + button('new-purchase', 'Nieuwe inkooporder', 'primary')) +
+    button('export-csv', 'Export alles (CSV)') + link('aanvullen', '', 'Voorraad aanvullen', 'button secondary') + button('new-purchase', 'Nieuwe inkooporder', 'primary')) +
     orderFilters(filters, ['concept', 'besteld', 'gedeeltelijk ontvangen', 'ontvangen']) +
     '<div id="filter-results">' + orderResults(state, filters, 'purchases') + '</div>';
   const supplier = state.suppliers.find(row => row.id === order.supplierId);
