@@ -32,4 +32,3 @@ export const table = (headers, rows, message) => rows.length ?
   '<div class="table-scroll" tabindex="0" role="region" aria-label="Resultaten"><table><thead><tr>' + headers.map(header =>
     '<th scope="col">' + esc(header) + '</th>').join('') + '</tr></thead><tbody>' + rows.map(row =>
     '<tr>' + row.map(cell => '<td>' + cell + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' : empty(message);
-export const packagingImage = new URL('../assets/packaging.webp', import.meta.url).href;

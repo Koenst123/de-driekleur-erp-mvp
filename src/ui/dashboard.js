@@ -1,5 +1,4 @@
 import { dashboard } from '../domain/selectors.js';
-import { stockOf } from '../domain/stock.js';
 import { esc, money, num, day, badge, button, panel, table, link, sub, pageHead, empty } from './components.js';
 import { icon } from './icons.js';
 
@@ -43,8 +42,7 @@ export function renderDashboard(state) {
     { label: 'Open verkooporders', value: num(data.openSales), note: 'Van concept tot verzending', symbol: 'sales', tone: 'green', page: 'verkoop' },
     { label: 'Open inkooporders', value: num(data.openPurchases), note: 'Inclusief deelontvangsten', symbol: 'purchase', tone: 'amber', page: 'inkoop' },
   ];
-  const alerts = data.low.slice(0, 4).map(product => {
-    const available = stockOf(state, product.id).available;
+  const alerts = data.low.slice(0, 4).map(({ product, available }) => {
     return '<li><span class="list-icon amber">' + icon('warning', 17) + '</span><div>' +
       link('artikelen', product.id, product.name) + '<small>' + esc(product.sku) + ' · min. ' + num(product.minimum) +
       '</small></div><strong>' + num(available) + ' vrij</strong></li>';

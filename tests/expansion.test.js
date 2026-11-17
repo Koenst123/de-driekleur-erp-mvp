@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createSeed } from '../src/data/seed.js';
+import { officialCatalog } from '../src/data/official-catalog.js';
 import { upgradeWorkspace } from '../src/data/workspace-version.js';
 import { acceptQuotation, declineQuotation, issueQuotation, saveQuotation } from '../src/domain/quotations.js';
 import { createReplenishmentDraft, replenishment } from '../src/domain/replenishment.js';
@@ -8,7 +9,7 @@ import { stockOf } from '../src/domain/stock.js';
 
 const date = '2026-11-17T10:00:00Z';
 const oil = 'TEL-46-J20';
-const shortage = 'AWS-46-J20';
+const shortage = 'DTE-EX46-J20';
 const quoteInput = {
   customerId: 'K-1', warehouseId: 'A', validUntil: '2026-11-17',
   reference: 'Onderhoud', lines: [{ productId: oil, quantity: 12 }],
@@ -42,17 +43,27 @@ describe('Offertes', () => {
     expect(() => acceptQuotation(state, { id }, date)).toThrow(/eerst uit/);
   });
 
-  it('behoudt bestaande werkruimtes bij de v2-uitbreiding', () => {
+  it('behoudt bestaande werkruimtes en voegt nieuwe catalogusartikelen één keer toe', () => {
     const state = createSeed();
+    const additions = new Set(officialCatalog.filter(item => item.opening).map(item => item.id));
     state.seedVersion = 1;
     delete state.quotations;
     delete state.counters.quotation;
+    state.products = state.products.filter(item => !additions.has(item.id));
+    state.balances = state.balances.filter(item => !additions.has(item.productId));
+    state.movements = state.movements.filter(item => !additions.has(item.productId));
+    state.counters.movement = state.movements.length;
     state.website.heading = 'Eigen werkruimte';
     const sales = structuredClone(state.sales);
     const upgraded = upgradeWorkspace(state);
-    expect(upgraded).toMatchObject({ seedVersion: 2, quotations: [], sales, website: { heading: 'Eigen werkruimte' } });
+    expect(upgraded).toMatchObject({ seedVersion: 3, quotations: [], sales, website: { heading: 'Eigen werkruimte' } });
+    expect(upgraded.products).toHaveLength(66);
+    expect(stockOf(upgraded, shortage, 'A').available).toBe(2);
+    expect(stockOf(upgraded, 'MOBIL-XHP222-E18', 'A').available).toBe(12);
     const id = saveQuotation(upgraded, quoteInput, date);
     expect(upgradeWorkspace(upgraded).quotations[0].id).toBe(id);
+    expect(upgraded.products).toHaveLength(66);
+    expect(stockOf(upgraded, shortage, 'A').available).toBe(2);
   });
 });
 

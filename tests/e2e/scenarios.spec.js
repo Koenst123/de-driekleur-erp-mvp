@@ -58,7 +58,7 @@ test('verkoop van 12 jerrycans en 6 emmers, assistent, verzending en factuur', a
   await ui(page).getByRole('button', { name: 'Nieuwe verkooporder' }).click();
   await chooseLine(page, 1, 'TEL-46-J20', 12);
   await modalButton(page, 'Artikelregel toevoegen').click();
-  await chooseLine(page, 2, 'SKF-LGMT2-E18', 6);
+  await chooseLine(page, 2, 'MOBIL-XHP222-E18', 6);
   await expect(dialog(page)).toContainText(/1\.524,60/);
   await modalButton(page, 'Concept opslaan').click();
   await expect(ui(page).getByRole('heading', { name: /^SO-/ })).toBeVisible();
@@ -85,8 +85,8 @@ test('verkoop van 12 jerrycans en 6 emmers, assistent, verzending en factuur', a
   await expect(ui(page).getByText('3 van 18 verpakkingen')).toBeVisible();
   await command('9 gepakt');
   await command('DEMO-TEL-46-J20');
-  await ui(page).getByRole('button', { name: 'Barcode invoeren voor SKF-LGMT2-E18' }).click();
-  await labelAmount(page, 'Barcode').fill('DEMO-SKF-LGMT2-E18');
+  await ui(page).getByRole('button', { name: 'Barcode invoeren voor MOBIL-XHP222-E18' }).click();
+  await labelAmount(page, 'Barcode').fill('DEMO-MOBIL-XHP222-E18');
   await modalButton(page, 'Scan registreren').click();
   await expect(ui(page).getByText('18 van 18 verpakkingen')).toBeVisible();
   expect(stock(await workspace(page), 'TEL-46-J20')).toEqual([24, 12, 12]);
@@ -95,7 +95,7 @@ test('verkoop van 12 jerrycans en 6 emmers, assistent, verzending en factuur', a
   await expect(ui(page).getByText('Verzonden', { exact: true })).toBeVisible();
   const shipped = await workspace(page);
   expect(stock(shipped, 'TEL-46-J20')).toEqual([12, 0, 12]);
-  expect(stock(shipped, 'SKF-LGMT2-E18')).toEqual([6, 0, 6]);
+  expect(stock(shipped, 'MOBIL-XHP222-E18')).toEqual([6, 0, 6]);
   expect(shipped.movements.slice(before.movements.length).map(row => row.delta)).toEqual([-12, -6]);
   await confirm(page, 'Factuurconcept genereren', 'Factuurconcept maken');
   await expect(ui(page).getByRole('heading', { name: /^FC-/ })).toBeVisible();
@@ -112,7 +112,7 @@ test('verkoop van 12 jerrycans en 6 emmers, assistent, verzending en factuur', a
 test('deelontvangsten vullen een voorraadtekort aan zonder deelreservering', async ({ page }) => {
   await ui(page).getByRole('button', { name: 'Nieuwe verkooporder' }).click();
   await labelAmount(page, 'Klant').selectOption('K-1');
-  await chooseLine(page, 1, 'AWS-46-J20', 8);
+  await chooseLine(page, 1, 'DTE-EX46-J20', 8);
   await expect(dialog(page)).toContainText('Onvoldoende voorraad');
   await modalButton(page, 'Concept opslaan').click();
   await expect(ui(page).getByRole('heading', { name: /^SO-/ })).toBeVisible();
@@ -125,7 +125,7 @@ test('deelontvangsten vullen een voorraadtekort aan zonder deelreservering', asy
   await navigate(page, 'Inkoop');
   await ui(page).getByRole('button', { name: 'Nieuwe inkooporder' }).click();
   await labelAmount(page, 'Leverancier').selectOption('L-2');
-  await chooseLine(page, 1, 'AWS-46-J20', 8);
+  await chooseLine(page, 1, 'DTE-EX46-J20', 8);
   await modalButton(page, 'Concept opslaan').click();
   await expect(ui(page).getByRole('heading', { name: /^PO-/ })).toBeVisible();
   const purchaseUrl = page.url();
@@ -137,21 +137,21 @@ test('deelontvangsten vullen een voorraadtekort aan zonder deelreservering', asy
   };
   await receive(2);
   await expect(ui(page).getByText('Gedeeltelijk ontvangen', { exact: true })).toBeVisible();
-  expect(stock(await workspace(page), 'AWS-46-J20')).toEqual([4, 0, 4]);
+  expect(stock(await workspace(page), 'DTE-EX46-J20')).toEqual([4, 0, 4]);
   await page.goto(saleUrl);
   await confirm(page, 'Order bevestigen');
   await expect(dialog(page).getByRole('alert')).toContainText('4 van 8 beschikbaar');
   await page.goto(purchaseUrl);
   await receive(6);
   await expect(ui(page).getByText('Ontvangen', { exact: true }).and(ui(page).locator('.badge'))).toBeVisible();
-  expect(stock(await workspace(page), 'AWS-46-J20')).toEqual([10, 0, 10]);
+  expect(stock(await workspace(page), 'DTE-EX46-J20')).toEqual([10, 0, 10]);
   await page.goto(saleUrl);
   await confirm(page, 'Order bevestigen');
   await expect(ui(page).getByText('Bevestigd', { exact: true })).toBeVisible();
-  expect(stock(await workspace(page), 'AWS-46-J20')).toEqual([10, 8, 2]);
+  expect(stock(await workspace(page), 'DTE-EX46-J20')).toEqual([10, 8, 2]);
   await confirm(page, 'Order annuleren', 'Order annuleren');
   await expect(ui(page).getByText('Geannuleerd', { exact: true })).toBeVisible();
-  expect(stock(await workspace(page), 'AWS-46-J20')).toEqual([10, 0, 10]);
+  expect(stock(await workspace(page), 'DTE-EX46-J20')).toEqual([10, 0, 10]);
 });
 
 test('artikel en klant beheren, website bewaren, toetsenbord en demo herstellen', async ({ page }) => {
@@ -198,7 +198,7 @@ test('artikel en klant beheren, website bewaren, toetsenbord en demo herstellen'
   await expect(ui(page).getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Demodata hersteld');
   const state = await workspace(page);
-  expect(state.products).toHaveLength(60);
+  expect(state.products).toHaveLength(66);
   expect(state.customers).toHaveLength(20);
   expect(state.website.heading).not.toBe('Een nieuwe demotitel');
 });
@@ -232,7 +232,7 @@ test('productdemo maakt een printbare offerte en een aanvuladvies uit actuele vo
   expect(stock(await workspace(page), 'TEL-46-J20')).toEqual([24, 12, 12]);
 
   await navigate(page, 'Voorraad aanvullen');
-  const row = ui(page).getByRole('row').filter({ hasText: 'AWS-46-J20' });
+  const row = ui(page).getByRole('row').filter({ hasText: 'DTE-EX46-J20' });
   await expect(row).toContainText('20 bestellen');
   await row.getByRole('button', { name: 'Inkoopconcept maken' }).click();
   await modalButton(page, 'Concept maken').click();
@@ -251,4 +251,43 @@ test('productdemo maakt een printbare offerte en een aanvuladvies uit actuele vo
   for (const value of ['4', '18', '22']) await expect(row.getByRole('cell', { name: value, exact: true })).toBeVisible();
   const purchase = (await workspace(page)).purchases.find(item => purchaseUrl.endsWith(item.id));
   expect(purchase.lines[0]).toMatchObject({ quantity: 20, received: 2 });
+});
+
+test('huisstijl, catalogus en alle hoofdschermen blijven bruikbaar', async ({ page }, testInfo) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  for (const [label, title] of [
+    ['Offertes', 'Offertes'], ['Verkoop', 'Verkoop'], ['Inkoop', 'Inkoop'], ['Artikelen', 'Artikelen'],
+    ['Voorraad', 'Voorraad'], ['Voorraad aanvullen', 'Voorraad aanvullen'], ['Magazijn', 'Magazijn'],
+    ['Klanten & CRM', 'Klanten'], ['Leveranciers', 'Leveranciers'], ['Financieel', 'Financieel'],
+    ['Documenten', 'Documenten'], ['Website', 'Website'],
+  ]) {
+    await navigate(page, label);
+    await expect(ui(page).getByRole('heading', { name: title, exact: true })).toBeVisible();
+  }
+
+  await navigate(page, 'Artikelen');
+  await ui(page).getByRole('combobox', { name: 'Herkomst' }).selectOption('official');
+  await expect(ui(page).getByText('7 artikelen', { exact: true })).toBeVisible();
+  await ui(page).getByRole('link', { name: 'Shell Omala S4 GXV 220' }).click();
+  await expect(ui(page).getByRole('link', { name: 'Productpagina De Driekleur Ede', exact: false }))
+    .toHaveAttribute('href', 'https://www.dedriekleurede.nl/shell-omala-s4-gxv-220.html');
+
+  await page.goto('/website.html');
+  await expect(ui(page).getByRole('heading', { level: 1 })).toContainText('Oliën, vetten en smeermiddelen');
+  const hero = ui(page).getByRole('img', { name: /Illustratieve magazijnfoto/ });
+  await expect.poll(() => hero.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+  const product = ui(page).getByRole('article').filter({ hasText: 'MOBIL-GREASE XHP 222' });
+  await product.scrollIntoViewIfNeeded();
+  await expect.poll(() => product.getByRole('img').evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+  await expect(product.getByRole('link')).toHaveAttribute('href', 'https://www.dedriekleurede.nl/mobil-grease-xhp-222.html');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: testInfo.outputPath('websitepreview.png'), animations: 'disabled' });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.getByRole('link', { name: 'Open productdemo' }).click();
+  await expect(ui(page).getByRole('heading', { name: 'Productdemo', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  expect(errors).toEqual([]);
 });

@@ -2,20 +2,29 @@ import { esc, button, pageHead, link } from './components.js';
 import { icon } from './icons.js';
 import { stockOf } from '../domain/stock.js';
 
-export const demoQuote = {
-  customerId: 'K-1', warehouseId: 'A', reference: 'Onderhoudsbestelling',
-  lines: [{ productId: 'TEL-46-J20', quantity: 12 }, { productId: 'SKF-LGMT2-E18', quantity: 6 }],
-};
+function demoProduct(state, id, fallback) {
+  return state.products.find(row => row.id === id) ?? state.products.find(row => row.id === fallback);
+}
+
+export function demoQuote(state) {
+  const grease = demoProduct(state, 'MOBIL-XHP222-E18', 'SKF-LGMT2-E18');
+  return {
+    customerId: 'K-1', warehouseId: 'A', reference: 'Onderhoudsbestelling',
+    lines: [{ productId: 'TEL-46-J20', quantity: 12 }, { productId: grease.id, quantity: 6 }],
+  };
+}
 
 export function presentationPage(state) {
-  const available = stockOf(state, 'AWS-46-J20', 'A').available;
+  const oil = demoProduct(state, 'DTE-EX46-J20', 'AWS-46-J20');
+  const grease = demoProduct(state, 'MOBIL-XHP222-E18', 'SKF-LGMT2-E18');
+  const available = stockOf(state, oil.id, 'A').available;
   const scenarios = [
     { symbol: 'sales', tone: 'blue', title: 'Van klantvraag naar levering',
-      copy: 'Rijnland Machinebouw vraagt 12 jerrycans hydrauliekolie en 6 emmers lagervet. Toon de prijsafspraak en volg de order tot het factuurconcept.',
+      copy: '12 jerrycans Shell Tellus S2 MX 46 en 6 emmers ' + grease.name + ' voor Rijnland Machinebouw.',
       steps: ['Maak en druk de offerte af.', 'Registreer akkoord en bevestig de verkooporder.', 'Pick met de magazijnassistent, verzend en maak een factuurconcept.'],
       action: button('demo-quotation', 'Start met een ingevulde offerte', 'primary') },
     { symbol: 'purchase', tone: 'green', title: 'Van voorraadtekort naar aanvulling',
-      copy: 'Voor Castrol Hyspin AWS 46 zijn in Ede ' + available + ' jerrycans beschikbaar. Bekijk het voorstel en controleer wat na een deelontvangst nog openstaat.',
+      copy: 'Voor ' + oil.name + ' zijn in Ede ' + available + ' jerrycans beschikbaar. Bekijk het voorstel en registreer een deelontvangst.',
       steps: ['Open de aanvulwerkvoorraad van magazijn A.', 'Maak het voorgestelde inkoopconcept en bevestig het.', 'Registreer een deelontvangst en controleer beschikbaar en verwacht.'],
       action: link('aanvullen', 'A', 'Bekijk het aanvulvoorstel', 'button primary') },
   ];

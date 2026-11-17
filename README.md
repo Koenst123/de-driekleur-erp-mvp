@@ -1,6 +1,6 @@
 # De Driekleur Business Suite
 
-Interactief Nederlandstalig ERP-prototype voor een groothandel in oliën, vetten en smeermiddelen. De demonstratie omvat verkoop, voorraad, inkoop, magazijn, CRM, documenten, factuurconcepten en een lokale websitepreview.
+Interactief Nederlandstalig ERP-prototype voor een groothandel in oliën, vetten en smeermiddelen. De demonstratie omvat verkoop, voorraad, inkoop, magazijn, CRM, documenten, factuurconcepten en een websitepreview met zeven productnamen uit het officiële assortiment van De Driekleur Ede.
 
 ## Starten
 

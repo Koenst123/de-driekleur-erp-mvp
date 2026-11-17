@@ -1,7 +1,8 @@
 import { movement } from '../domain/stock.js';
+import { addOfficialProducts } from './official-catalog.js';
 import { saveSale, confirmSale, cancelSale, recordPick, finishPick, shipSale, invoiceSale, savePurchase, confirmPurchase, receivePurchase } from '../domain/orders.js';
 
-export const SEED_VERSION = 2;
+export const SEED_VERSION = 3;
 export const defaultWebsite = {
   heading: 'Oliën, vetten en smeermiddelen voor dagelijks vakwerk.',
   introduction: 'Bekijk een selectie hydrauliekoliën, lagervetten en tandwieloliën voor werkplaatsen en industriële toepassingen.',
@@ -136,5 +137,6 @@ export function createSeed() {
     { id: 'D-2', title: 'Voorbeeld leverafspraak', category: 'Klant', targetKind: 'customers', targetId: 'K-1', sample: 'relatie', date: opening },
     { id: 'D-3', title: 'Voorbeeld verzendbon', category: 'Order', targetKind: 'sales', targetId: state.sales[0].id, sample: 'order', date: opening },
   ];
+  addOfficialProducts(state);
   return state;
 }

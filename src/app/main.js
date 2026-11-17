@@ -245,7 +245,7 @@ function closeNav() {
 
 const actions = {
   'new-quotation': ({ page, id }) => editQuotation(page === 'klanten' ? { customerId: id } : {}),
-  'demo-quotation': () => editQuotation(demoQuote),
+  'demo-quotation': ({ state }) => editQuotation(demoQuote(state)),
   'edit-quotation': ({ state, id }) => editQuotation(state.quotations.find(row => row.id === id)),
   'print-quotation': () => window.print(),
   'issue-quotation': ({ id }) => commandModal('Offerte uitbrengen', 'Leg de prijsregels vast. Je kunt de offerte afdrukken of als pdf opslaan.', 'Uitbrengen',

@@ -1,5 +1,5 @@
 import { savePurchase } from './orders.js';
-import { get, requireRule, stockOf } from './stock.js';
+import { get, requireRule, stockByProduct } from './stock.js';
 
 export const defaultTarget = minimum => Math.min(minimum * 2, 100000);
 
@@ -17,8 +17,9 @@ export function replenishment(state, warehouseId) {
       inbound.set(line.productId, (inbound.get(line.productId) ?? 0) + line.quantity - line.received);
     }
   }
+  const totals = stockByProduct(state, warehouseId);
   return state.products.filter(product => locations.has(product.locationId)).map(product => {
-    const { physical, reserved, available } = stockOf(state, product.id, warehouseId);
+    const { physical = 0, reserved = 0, available = 0 } = totals.get(product.id) ?? {};
     const incoming = inbound.get(product.id) ?? 0;
     const projected = available + incoming;
     const target = product.targetStock ?? defaultTarget(product.minimum);

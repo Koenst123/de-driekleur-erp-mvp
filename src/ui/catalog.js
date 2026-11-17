@@ -1,8 +1,10 @@
-import { stockOf } from '../domain/stock.js';
+import { stockByProduct, stockOf } from '../domain/stock.js';
+import { catalogListing } from '../data/official-catalog.js';
+import { catalogImage } from './catalog-image.js';
 import { defaultTarget } from '../domain/replenishment.js';
 import { recentFirst } from '../domain/selectors.js';
 import { movementsTable } from './dashboard.js';
-import { esc, num, money, badge, button, table, panel, pageHead, link, definition, field, input, option, options, select, textarea, packagingImage } from './components.js';
+import { esc, num, money, badge, button, table, panel, pageHead, link, definition, field, input, option, options, select, textarea } from './components.js';
 
 const productName = product => product.sku + ' · ' + product.name;
 export const locationOptions = (state, active, warehouse) => options(state.locations.filter(location => !warehouse || location.warehouseId === warehouse), active, row => row.code);
@@ -16,6 +18,7 @@ function filterForm(items) {
 export function productsPage(state, id, filters) {
   const product = state.products.find(row => row.id === id);
   if (product) {
+    const listing = catalogListing(product);
     const stock = stockOf(state, product.id);
     const supplier = state.suppliers.find(row => row.id === product.supplierId);
     const rows = state.balances.filter(row => row.productId === id).map(row => [
@@ -30,8 +33,9 @@ export function productsPage(state, id, filters) {
         ['Aanvullen tot', num(product.targetStock ?? defaultTarget(product.minimum))],
         ['Leverancier', link('leveranciers', supplier.id, supplier.name)], ['Voorkeurslocatie', esc(product.locationId)], ['Demobarcode', '<code>' + esc(product.barcode) + '</code>'],
       ]) + (product.description ? '<p class="description">' + esc(product.description) + '</p>' : '') +
+      (listing ? '<p class="description"><a class="text-link" target="_blank" rel="noopener noreferrer" href="' + esc(listing.url) + '">Productpagina De Driekleur Ede ↗</a></p>' : '') +
       (product.source ? '<p class="description"><a class="text-link" target="_blank" rel="noopener noreferrer" href="' + esc(product.source) + '">Fabrikantinformatie ↗</a></p>' : '')) +
-      '<figure class="product-image"><img src="' + esc(packagingImage) + '" alt="Illustratieve verpakkingen voor olie en smeermiddelen"><figcaption>Illustratieve demoverpakkingen</figcaption></figure></div>' +
+      '<figure class="product-image">' + catalogImage(listing?.image, 'detail-photo') + '<figcaption>Illustratieve demoverpakking</figcaption></figure></div>' +
       panel('Voorraad per locatie · ' + num(stock.available) + ' beschikbaar', table(['Locatie', 'Fysiek', 'Gereserveerd', 'Beschikbaar'], rows), button('adjust-stock', 'Voorraad corrigeren')) +
       panel('Voorraadgeschiedenis', movementsTable(state, state.movements.filter(row => row.productId === id).sort(recentFirst), false));
   }
@@ -40,6 +44,7 @@ export function productsPage(state, id, filters) {
     filterForm([
       field('search', 'Zoeken', input('search', filters.search, 'type="search" placeholder="SKU, naam of merk"')),
       field('category', 'Categorie', select('category', option('', 'Alle categorieën', filters.category) + categories.map(item => option(item, item, filters.category)).join(''))),
+      field('source', 'Herkomst', select('source', option('', 'Alle artikelen', filters.source) + option('official', 'Op website De Driekleur', filters.source))),
       field('sort', 'Sorteren op', select('sort', [['sku', 'SKU'], ['name', 'Artikelnaam'], ['price', 'Verkoopprijs'], ['stock', 'Beschikbaarheid']].map(([id, label]) => option(id, label, filters.sort)).join(''))),
     ]) + '<div id="filter-results">' + productResults(state, filters) + '</div>';
 }
@@ -47,20 +52,22 @@ export function productsPage(state, id, filters) {
 export function productResults(state, filters) {
   const search = (filters.search ?? '').toLowerCase().trim();
   const matches = state.products.filter(row => (!filters.category || row.category === filters.category) &&
+    (!filters.source || catalogListing(row)) &&
     [row.sku, row.name, row.brand].some(value => value.toLowerCase().includes(search)));
-  const available = new Map(matches.map(row => [row.id, stockOf(state, row.id).available]));
+  const stock = stockByProduct(state);
+  const available = id => stock.get(id)?.available ?? 0;
   const compare = {
     name: (a, b) => a.name.localeCompare(b.name, 'nl'),
     price: (a, b) => a.salePrice - b.salePrice,
-    stock: (a, b) => available.get(a.id) - available.get(b.id),
+    stock: (a, b) => available(a.id) - available(b.id),
     sku: (a, b) => a.sku.localeCompare(b.sku, 'nl'),
   };
   matches.sort(compare[filters.sort] ?? compare.sku);
   const rows = matches.map(product => [
     link('artikelen', product.id, product.name) + '<small class="cell-sub">' + esc(product.sku) + '</small>',
     esc(product.category), esc(product.packaging + ' · ' + product.content + ' ' + product.unit),
-    money(product.salePrice), num(available.get(product.id)),
-    available.get(product.id) < product.minimum ? badge('Onder minimum', 'amber') : badge('Op peil', 'green'),
+    money(product.salePrice), num(available(product.id)),
+    available(product.id) < product.minimum ? badge('Onder minimum', 'amber') : badge('Op peil', 'green'),
   ]);
   return panel('Assortiment', table(['Artikel', 'Categorie', 'Verpakking', 'Verkoopprijs', 'Beschikbaar', 'Voorraadstatus'], rows),
     '<span class="count">' + matches.length + ' artikelen</span>');

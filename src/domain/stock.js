@@ -21,16 +21,24 @@ export function balance(state, productId, locationId) {
     ?? { productId, locationId, physical: 0, reserved: 0 };
 }
 
-export function stockOf(state, productId, warehouseId) {
+const emptyStock = () => ({ physical: 0, reserved: 0, available: 0 });
+
+export function stockByProduct(state, warehouseId, productId) {
   const locations = new Set(state.locations.filter(location => !warehouseId || location.warehouseId === warehouseId).map(location => location.id));
-  return state.balances.reduce((total, row) => {
-    if (row.productId === productId && locations.has(row.locationId)) {
-      total.physical += row.physical;
-      total.reserved += row.reserved;
-      total.available += row.physical - row.reserved;
-    }
-    return total;
-  }, { physical: 0, reserved: 0, available: 0 });
+  const products = new Map();
+  for (const row of state.balances) {
+    if ((productId && row.productId !== productId) || !locations.has(row.locationId)) continue;
+    const total = products.get(row.productId) ?? emptyStock();
+    total.physical += row.physical;
+    total.reserved += row.reserved;
+    total.available += row.physical - row.reserved;
+    products.set(row.productId, total);
+  }
+  return products;
+}
+
+export function stockOf(state, productId, warehouseId) {
+  return stockByProduct(state, warehouseId, productId).get(productId) ?? emptyStock();
 }
 
 export function mutableBalance(state, productId, locationId) {

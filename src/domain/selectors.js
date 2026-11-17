@@ -1,11 +1,12 @@
 import { totals } from './orders.js';
-import { stockOf } from './stock.js';
+import { stockByProduct } from './stock.js';
 
 export const activePick = item => item.status === 'open' || item.status === 'gepakt';
 export const recentFirst = (a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id, 'nl', { numeric: true });
 
 export function dashboard(state) {
   const products = new Map(state.products.map(product => [product.id, product]));
+  const totalsByProduct = stockByProduct(state);
   const shipped = state.sales.filter(order => order.status === 'verzonden');
   const salesByMonth = new Map();
   const articles = new Map();
@@ -28,7 +29,10 @@ export function dashboard(state) {
     openSales: state.sales.filter(order => ['concept', 'bevestigd', 'gepikt'].includes(order.status)).length,
     openPurchases: state.purchases.filter(order => order.status !== 'ontvangen').length,
     picks: state.picks.filter(activePick).length,
-    low: state.products.filter(product => stockOf(state, product.id).available < product.minimum),
+    low: state.products.flatMap(product => {
+      const available = totalsByProduct.get(product.id)?.available ?? 0;
+      return available < product.minimum ? [{ product, available }] : [];
+    }),
     months: [...salesByMonth].sort(([a], [b]) => a.localeCompare(b)).slice(-6),
     best: [...articles.values()].sort((a, b) => b.count - a.count).slice(0, 5),
     recent: [...state.movements].sort(recentFirst).slice(0, 5),
