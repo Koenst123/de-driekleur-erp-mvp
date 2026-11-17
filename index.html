@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101d36">
+  <title>De Driekleur Ede | Voorraad &amp; magazijn — prototype</title>
+  <style>
+    :root {
+      --navy: #142b45;
+      --navy-2: #183c5c;
+      --ink: #202b3e;
+      --muted: #7c8798;
+      --line: #e8edf3;
+      --canvas: #f4f7fa;
+      --white: #fff;
+      --teal: #0061B4;
+      --teal-dark: #004F92;
+      --teal-pale: #EAF3FA;
+      --blue: #0A8DE9;
+      --blue-pale: #EDF5FC;
+      --amber: #dc942d;
+      --amber-pale: #fff5df;
+      --red: #d45858;
+      --red-pale: #fff0ee;
+      --shadow: 0 10px 30px rgba(27, 47, 75, .055);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--canvas); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .sidebar {
+      background: var(--navy); color: #d2daea; width: 246px; position: fixed;
+      inset: 0 auto 0 0; display: flex; flex-direction: column; padding: 24px 16px 18px;
+      z-index: 5;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 2px 10px 29px; color: white; }
+    .brand-logo { display:block; width:190px; height:auto; object-fit:contain; }
+    .brand-mark { width: 37px; height: 37px; border-radius: 12px; display: grid; place-items: center;
+      background: linear-gradient(145deg, #26c9b6, #109c91); color: #fff; font-size: 18px; font-weight: 800; }
+    .brand-name { font-weight: 750; font-size: 15px; letter-spacing: .1px; }
+    .brand-sub { display: block; color: #98a8c1; font-size: 10px; margin-top: 3px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .nav-label { color: #7585a1; text-transform: uppercase; letter-spacing: 1.1px; font-size: 10px; font-weight: 700; padding: 0 12px 10px; }
+    .nav { display: grid; gap: 5px; }
+    .nav button { border: 0; background: transparent; color: #acb9ce; border-radius: 9px; padding: 11px 12px;
+      width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; font-size: 13px; transition: .16s ease; }
+    .nav button:hover { background: rgba(255,255,255,.07); color: white; }
+    .nav button.active { color: white; background: #213553; box-shadow: inset 3px 0 var(--teal); }
+    .nav-icon { width: 19px; text-align: center; font-size: 16px; }
+    .nav-count { margin-left: auto; font-size: 10px; background: rgba(255,255,255,.1); padding: 3px 7px; border-radius: 20px; }
+    .side-spacer { flex: 1; }
+    .side-help { border: 1px solid rgba(255,255,255,.11); background: rgba(255,255,255,.045); border-radius: 12px; padding: 14px; margin: 12px 3px 15px; }
+    .side-help strong { font-size: 12px; color: #edf3fc; display: block; margin-bottom: 6px; }
+    .side-help a { color:#b6d9f1; text-decoration:underline; }
+    .side-help span { font-size: 11px; line-height: 1.5; color: #91a1bb; display: block; }
+    .profile { border-top: 1px solid rgba(255,255,255,.1); padding: 16px 7px 0; display: flex; align-items: center; gap: 10px; }
+    .avatar { background: #d9e3ff; color: #4159a5; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 750; flex: none; }
+    .profile strong { display:block; color:#f0f4fa; font-size:12px; }
+    .profile small { display:block; color:#91a1bb; font-size:10px; margin-top:3px; }
+    .main { margin-left: 246px; min-height: 100vh; }
+    .topbar { height: 70px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 34px; position: sticky; top: 0; z-index: 4; }
+    .crumb { color: #8b95a5; font-size: 12px; }
+    .crumb b { color: #344156; font-weight: 650; }
+    .top-actions { display:flex; align-items:center; gap:17px; }
+    .global-search { width: 230px; position:relative; }
+    .global-search input { width: 100%; border: 1px solid #e6ebf1; background: #f8fafc; border-radius: 8px; padding: 9px 12px 9px 34px; font-size: 11px; outline: none; }
+    .global-search input:focus { border-color: #84bde4; box-shadow: 0 0 0 3px rgba(0,97,180,.12); }
+    .search-icon { position:absolute; left:12px; top:8px; color:#96a0af; font-size:14px; }
+    .icon-button { border:0; background:transparent; color:#6d7888; font-size:18px; position:relative; padding:6px; }
+    .notification-dot { width:6px; height:6px; background:#ef7771; border:1px solid white; border-radius:50%; position:absolute; top:6px; right:5px; }
+    .content { max-width: 1540px; margin: 0 auto; padding: 27px 34px 44px; }
+    .prototype-banner { display:flex; align-items:flex-start; gap:10px; padding:11px 14px; border-radius:9px; background:#fff9ea; border:1px solid #f3e6c4; color:#80612e; font-size:11px; line-height:1.5; margin-bottom:23px; }
+    .prototype-banner b { color:#674a1c; }
+    .prototype-banner .tag { color:#805d21; font-weight:750; white-space:nowrap; }
+    .page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:21px; }
+    h1 { font-size:22px; letter-spacing:-.4px; margin:0 0 6px; font-weight:740; color:#1d293b; }
+    .subtitle { font-size:12px; color:var(--muted); margin:0; }
+    .head-actions { display:flex; gap:9px; align-items:center; }
+    .date-chip { background:#fff; border:1px solid var(--line); border-radius:8px; color:#667285; font-size:11px; padding:9px 11px; }
+    .btn { border:1px solid var(--line); border-radius:8px; padding:9px 12px; background:#fff; color:#445166; font-size:11px; font-weight:650; transition:.16s ease; }
+    .btn:hover { border-color:#c5d0dd; transform:translateY(-1px); }
+    .btn.primary { color:#fff; background:var(--teal); border-color:var(--teal); box-shadow:0 3px 8px rgba(0,97,180,.18); }
+    .btn.primary:hover { background:var(--teal-dark); border-color:var(--teal-dark); }
+    .btn.soft { background:var(--teal-pale); border-color:var(--teal-pale); color:#0061B4; }
+    .btn.small { padding:7px 10px; font-size:10px; }
+    .kpis { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; margin-bottom:19px; }
+    .card { background:#fff; border:1px solid #e9eef3; border-radius:12px; box-shadow:var(--shadow); }
+    .kpi { padding:17px 18px 15px; min-height:119px; }
+    .kpi-top { display:flex; align-items:center; justify-content:space-between; color:#798597; font-size:11px; }
+    .kpi-icon { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-size:15px; }
+    .kpi-icon.teal { background:var(--teal-pale); color:#0061B4; }
+    .kpi-icon.blue { background:var(--blue-pale); color:var(--blue); }
+    .kpi-icon.amber { background:var(--amber-pale); color:var(--amber); }
+    .kpi-icon.red { background:var(--red-pale); color:var(--red); }
+    .kpi-value { font-size:24px; font-weight:750; color:#1f2d40; margin:10px 0 5px; letter-spacing:-.7px; }
+    .kpi-foot { color:#929baa; font-size:10px; }
+    .up { color:#1a9c87; font-weight:700; }
+    .layout-grid { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(295px,.9fr); gap:17px; align-items:start; }
+    .stack { display:grid; gap:17px; min-width:0; }
+    .card-head { padding:17px 19px 13px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .card-title { font-size:13px; font-weight:730; color:#26344a; margin:0; }
+    .card-hint { font-size:10px; color:#929baa; margin-top:4px; }
+    .link-button { background:none; border:0; padding:4px 0; color:#0061B4; font-size:10px; font-weight:700; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; white-space:nowrap; }
+    th { color:#939dad; background:#fbfcfd; text-align:left; font-size:9px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:10px 15px; border-top:1px solid #f0f2f5; border-bottom:1px solid #f0f2f5; }
+    td { padding:12px 15px; border-bottom:1px solid #f0f2f5; color:#536074; font-size:10px; }
+    tbody tr:last-child td { border-bottom:0; }
+    tbody tr:hover { background:#fbfdfd; }
+    .product-cell { display:flex; align-items:center; gap:10px; }
+    .product-thumb { width:31px; height:31px; border-radius:8px; display:grid; place-items:center; background:#f0f5f7; font-size:15px; flex:none; }
+    .product-name { font-size:10px; font-weight:680; color:#334157; }
+    .product-sku { font-size:9px; color:#9aa3b1; margin-top:3px; }
+    .qty { font-weight:700; color:#334157; }
+    .pill { display:inline-flex; align-items:center; gap:5px; border-radius:20px; padding:5px 8px; font-size:9px; font-weight:700; }
+    .pill:before { content:""; width:5px; height:5px; background:currentColor; border-radius:50%; }
+    .pill.good { color:#188c73; background:#e8f7f1; }
+    .pill.low { color:#b77a1e; background:#fff4dd; }
+    .pill.out { color:#c44f4c; background:#ffefed; }
+    .pill.blue { color:#526cce; background:#eef1ff; }
+    .filters { display:flex; align-items:center; gap:8px; padding:0 18px 13px; }
+    .filters input,.filters select { border:1px solid #e7ebf0; background:#fff; border-radius:7px; padding:8px 10px; color:#596578; font-size:10px; outline:none; }
+    .filters input { min-width:150px; flex:1; }
+    .filters select { min-width:125px; }
+    .filters input:focus,.filters select:focus { border-color:#84bde4; }
+    .table-footer { padding:11px 18px; border-top:1px solid #f0f2f5; color:#929baa; font-size:9px; display:flex; justify-content:space-between; }
+    .chart-area { padding:0 19px 16px; }
+    .chart-legend { display:flex; align-items:center; gap:14px; color:#8e98a8; font-size:9px; }
+    .legend-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; background:var(--teal); }
+    .bars { height:115px; display:flex; align-items:end; gap:clamp(9px,2.4vw,24px); padding:12px 5px 0; border-bottom:1px solid #e9edf2; }
+    .bar-set { display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; height:100%; justify-content:end; }
+    .bar { width:min(25px,72%); border-radius:5px 5px 1px 1px; background:linear-gradient(180deg,#0A8DE9,#0061B4); min-height:8px; opacity:.9; }
+    .bar-label { font-size:9px; color:#a0a8b4; }
+    .orders-list { padding:0 18px 4px; }
+    .order-row { display:flex; align-items:center; gap:11px; padding:12px 0; border-bottom:1px solid #f0f2f5; }
+    .order-row:last-child { border-bottom:0; }
+    .order-icon { width:32px; height:32px; border-radius:9px; background:#f0f4fb; color:#6076bd; display:grid; place-items:center; font-size:14px; flex:none; }
+    .order-info { flex:1; min-width:0; }
+    .order-info strong { display:block; font-size:10px; color:#344156; }
+    .order-info span { display:block; color:#99a2af; font-size:9px; margin-top:4px; }
+    .assistant { padding:0; overflow:hidden; }
+    .assistant-head { padding:16px 17px; color:white; background:linear-gradient(112deg,#172945,#203858); display:flex; align-items:center; gap:10px; }
+    .assistant-icon { background:rgba(33,202,181,.17); color:#88c9f2; width:33px; height:33px; border-radius:10px; display:grid; place-items:center; font-size:16px; }
+    .assistant-head strong { font-size:12px; display:block; }
+    .assistant-head small { color:#a8bbd1; display:block; font-size:9px; margin-top:4px; }
+    .demo-state { margin-left:auto; border:1px solid rgba(255,255,255,.18); border-radius:20px; padding:5px 7px; color:#a9c8c5; font-size:8px; white-space:nowrap; }
+    .assistant-body { padding:14px 15px 13px; }
+    .assistant-note { border:1px solid #e7f1ef; background:#f6fbfa; border-radius:8px; padding:9px 10px; color:#798b89; line-height:1.45; font-size:9px; margin-bottom:12px; }
+    .chat-log { display:grid; gap:9px; max-height:190px; overflow:auto; padding:2px 1px 11px; }
+    .chat-message { max-width:92%; border-radius:10px; padding:9px 10px; font-size:10px; line-height:1.5; }
+    .chat-message.bot { background:#f1f4f8; color:#526074; border-top-left-radius:3px; }
+    .chat-message.user { justify-self:end; background:#EAF3FA; color:#245b83; border-top-right-radius:3px; }
+    .command-label { color:#929baa; font-size:9px; font-weight:700; margin:2px 0 7px; }
+    .commands { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:11px; }
+    .command-chip { border:1px solid #e6ecf1; background:white; color:#5b687a; border-radius:18px; font-size:9px; padding:6px 8px; }
+    .command-chip:hover { color:#0061B4; border-color:#b8d9ef; background:#f8fdfc; }
+    .chat-compose { display:flex; gap:6px; border-top:1px solid #eef1f4; padding-top:11px; }
+    .chat-compose input { min-width:0; flex:1; border:1px solid #e7ebf0; border-radius:7px; padding:8px 9px; font-size:9px; outline:none; }
+    .chat-compose input:focus { border-color:#84bde4; }
+    .send-button { width:31px; border:0; background:var(--teal); color:#fff; border-radius:7px; font-size:14px; }
+    .pick-card { padding-bottom:14px; }
+    .pick-summary { display:flex; align-items:center; justify-content:space-between; margin:0 18px 11px; background:#f7f9fb; padding:10px 11px; border-radius:8px; }
+    .pick-summary strong { display:block; font-size:10px; color:#344156; }
+    .pick-summary span { display:block; color:#929baa; font-size:9px; margin-top:4px; }
+    .progress-track { height:5px; border-radius:6px; background:#edf0f3; margin:0 18px 11px; overflow:hidden; }
+    .progress-bar { width:0%; height:100%; border-radius:6px; background:var(--teal); transition:width .2s; }
+    .pick-lines { padding:0 18px; }
+    .pick-line { display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid #f1f3f6; }
+    .pick-line:last-child { border-bottom:0; }
+    .pick-line input { accent-color:var(--teal); width:14px; height:14px; }
+    .pick-line label { flex:1; font-size:9px; color:#576478; cursor:pointer; }
+    .pick-line label span { display:block; font-size:8px; color:#9ba4b1; margin-top:3px; }
+    .pick-qty { color:#334157; font-size:10px; font-weight:750; }
+    .pick-actions { display:flex; justify-content:space-between; gap:8px; padding:12px 18px 0; }
+    .pick-actions .btn { flex:1; text-align:center; }
+    .view { display:none; }
+    .view.active { display:block; animation:fade .2s ease; }
+    @keyframes fade { from { opacity:.5; transform:translateY(3px); } to { opacity:1; transform:none; } }
+    .inventory-card { overflow:hidden; }
+    .empty-row { text-align:center; color:#919baa; padding:25px; }
+    .wide-card { margin-top:17px; }
+    .orders-table td { padding-top:14px; padding-bottom:14px; }
+    .order-number { color:#3e5ec3; font-weight:750; }
+    .report-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:17px; }
+    .report-stat { padding:18px; display:flex; gap:14px; align-items:center; border-bottom:1px solid #f0f2f5; }
+    .report-stat:last-child { border:0; }
+    .report-stat .kpi-icon { flex:none; }
+    .report-stat strong { display:block; font-size:18px; color:#29374d; }
+    .report-stat span { display:block; color:#909aa9; font-size:10px; margin-top:4px; }
+    .scan-form { padding: 0 18px 17px; }
+    .scan-form label { display:block; margin:0 0 7px; color:#6e7a8b; font-size:10px; font-weight:700; }
+    .scan-form > div { display:flex; gap:8px; }
+    .scan-form input { min-width:0; flex:1; border:1px solid #e4e9ef; border-radius:7px; padding:10px; font-size:11px; outline:none; }
+    .scan-form input:focus { border-color:#84bde4; }
+    .scan-form p { margin:7px 0 0; color:#929baa; font-size:9px; }
+    .report-note { padding:17px 19px; color:#738093; font-size:11px; line-height:1.6; }
+    .report-note strong { color:#344156; }
+    .warehouse-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:17px; }
+    .zone-list { padding:0 18px 12px; }
+    .zone { display:flex; align-items:center; gap:11px; padding:13px 0; border-bottom:1px solid #f0f2f5; }
+    .zone:last-child { border-bottom:0; }
+    .zone-code { background:#eff4f8; color:#506078; border-radius:7px; padding:8px 10px; font-size:10px; font-weight:750; }
+    .zone-text { flex:1; color:#4b596d; font-size:10px; }
+    .zone-text small { display:block; color:#9ba4b1; font-size:9px; margin-top:4px; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(12,24,43,.45); display:none; align-items:center; justify-content:center; z-index:20; padding:15px; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:white; width:min(430px,100%); border-radius:14px; padding:21px; box-shadow:0 25px 70px rgba(0,0,0,.2); }
+    .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:17px; }
+    .modal-head h2 { margin:0; font-size:16px; color:#26344a; }
+    .close-modal { border:0; background:#f3f5f7; width:28px; height:28px; border-radius:8px; color:#697587; }
+    .field { display:grid; gap:6px; margin-bottom:12px; }
+    .field label { color:#6e7a8b; font-size:10px; font-weight:700; }
+    .field input,.field select { width:100%; border:1px solid #e4e9ef; padding:10px; border-radius:7px; outline:none; font-size:11px; color:#3b4759; }
+    .field input:focus,.field select:focus { border-color:#8ad9d0; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+    .toast { position:fixed; bottom:21px; right:22px; z-index:30; background:#20334f; color:white; border-radius:9px; padding:12px 15px; box-shadow:0 9px 30px rgba(14,30,53,.2); font-size:11px; max-width:min(370px,calc(100vw - 40px)); opacity:0; transform:translateY(8px); pointer-events:none; transition:.2s; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .muted { color:#939dad; }
+    @media (max-width:1100px) {
+      .sidebar { width:210px; }
+      .main { margin-left:210px; }
+      .content { padding-left:24px; padding-right:24px; }
+      .topbar { padding:0 24px; }
+      .layout-grid { grid-template-columns:minmax(0,1.3fr) minmax(275px,.9fr); }
+    }
+    @media (max-width:850px) {
+      .sidebar { width:66px; padding:19px 9px 14px; align-items:center; }
+      .brand { padding:0 0 25px; }
+      .brand-mark { width:38px; height:38px; }
+      .brand-logo { width:48px; margin:0 auto; }
+      .brand-name,.nav-label,.nav button .nav-text,.nav-count,.side-help,.profile > div:not(.avatar) { display:none; }
+      .nav { width:100%; }
+      .nav button { justify-content:center; padding:12px 7px; }
+      .nav-icon { font-size:17px; }
+      .profile { justify-content:center; padding:14px 0 0; width:100%; }
+      .main { margin-left:66px; }
+      .kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .layout-grid,.report-grid,.warehouse-grid { grid-template-columns:1fr; }
+      .topbar { padding:0 18px; }
+      .content { padding:22px 18px 35px; }
+    }
+    @media (max-width:560px) {
+      .topbar { height:60px; padding:0 13px; }
+      .global-search { width:min(43vw,180px); }
+      .crumb { font-size:10px; }
+      .top-actions { gap:9px; }
+      .content { padding:17px 12px 28px; }
+      .page-head { display:block; }
+      .head-actions { margin-top:13px; }
+      .date-chip { display:none; }
+      .kpis { gap:9px; }
+      .kpi { min-height:107px; padding:13px; }
+      .kpi-value { font-size:21px; }
+      .prototype-banner { font-size:10px; }
+      .prototype-banner .tag { display:none; }
+      .card-head { padding:14px; }
+      .filters { padding:0 13px 11px; flex-wrap:wrap; }
+      .filters input { flex-basis:100%; }
+      .filters select { flex:1; }
+      th { padding:9px 11px; }
+      td { padding:10px 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><img class="brand-logo" alt="De Driekleur Ede smeermiddelen" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjI0IiBoZWlnaHQ9IjczIiB2aWV3Qm94PSIwIDAgMjI0IDczIj4NCiAgPGRlZnM+DQogICAgPHBhdHRlcm4gaWQ9InBhdHRlcm4iIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAzMzEgMTA4Ij4NCiAgICAgIDxpbWFnZSB3aWR0aD0iMzMxIiBoZWlnaHQ9IjEwOCIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFVc0FBQUJzQ0FZQUFBRGphWkNrQUFBTWJHbERRMUJKUTBNZ1VISnZabWxzWlFBQVNJbVZWd2RZVThrV25sdVNrSkNFRWdoRlN1aE5rRjZsaE5BaUNFZ1ZiSVFra0ZCaVRBZ3FkdFpGQmRjdW9salJWUkZGMXdMSW9pTDJzaWoydmxoUVdWa1hDNHFpOGlZa29PdSs4cjN6ZlhQbnYyZk8vS2ZjbVh2dkFLRFZ5NU5LODFCdEFQSWxCYktFeUZEVzJMUjBGcWtEYUFKalFBYzBnUEQ0Y2lrN1BqNEdRQm5zL3k3dmJnQkUyVjkxVm5MOWMveS9pcTVBS09jRGdJeUhPRk1nNStkRDNBd0F2cDR2bFJVQVFGVHFyYVlXU0pWNExzUjZNaGdneEt1VU9GdUZkeXB4cGdvM0RkZ2tKWEFndmd5QUJwWEhrMlVEUUw4SDlheENmamJrb1grQzJGVWlFRXNBMEJvT2NSQmZ4Qk5Bckl4OWVINytaQ1d1Z05nZTJrc2hodkVBMzh4dk9MUC94cDg1eE0valpROWhWVjREb2hFbWxrdnplTlAvejlMOGI4blBVd3o2c0lXTktwSkZKU2p6aHpXOGxUczVXb21wRUhkSk1tUGpsTFdHdUZjc1VOVWRBSlFpVWtRbHEreFJFNzZjQStzSG1CQzdDbmhoMFJDYlFCd2h5WXVOVWVzenM4UVJYSWpoYWtHbmlRdTRTUkFiUXJ4UUtBOVBWTnRzbGsxT1VQdEM2N0prSExaYWY1WW5HL0NyOVBWQWtadk1Wdk8vRmdtNWFuNk1YaVJLU29XWUFyRjFvVGdsRm1JNnhDN3kzTVJvdGMzSUloRW5kdEJHcGtoUXhtOE5jWUpRRWhtcTRzY0tzMlFSQ1dyNzBuejVZTDdZWnBHWUc2dkcrd3RFU1ZHcSttQW4rYnlCK0dFdTJHV2hoSjA4eUNPVWo0MFp6RVVnREF0WDVZNDlGMHFTRTlVOHZkS0MwQVRWWEp3aXpZdFgyK09Xd3J4SXBkNFNZazk1WWFKNkxwNVNBQmVuaWgvUGtoYkVKNm5peEl0eWVLUGlWZkhneTBBTTRJQXd3QUlLMkRMQlpKQUR4SzFkOVYzd1RqVVNBWGhBQnJLQkVEaXJOWU16VWdkR0pQQ2FDSXJBbnhBSmdYeG9YdWpBcUJBVVF2M25JYTNxNmd5eUJrWUxCMmJrZ3FjUTU0Tm9rQWZ2RlFPekpFUGVVc0FUcUJIL3d6c1BOajZNTnc4MjVmaS8xdzlxdjJyWVVCT2oxaWdHUGJLMEJpMko0Y1F3WWhReGd1aUFHK05CZUFBZUE2OGhzTG5qdnJqZllCNWY3UWxQQ1cyRVI0VHJoSGJDN1VuaVl0bDNVWTRHN1pBL1FsMkx6RzlyZ2R0Q1RpODhGQStFN0pBWlorTEd3Qm4zaEg3WWVERDA3QVcxSEhYY3lxcXd2dVArV3diZlBBMjFIZG1WakpJTnlDRmsrKzluMGgzcFhrTXN5bHAvV3g5VnJKbEQ5ZVlNalh6dm4vTk45UVd3ai83ZUVsdUlIY0RPWU1leGMxZ1RWZzlZMkRHc0FidUlIVkhpb2RYMVpHQjFEWHBMR0lnbkYvS0kvK0dQcC9hcHJLVGN0Y2ExMC9XVGFxeEFPSzFBdWZFNGs2WFRaZUpzVVFHTERiOE9RaFpYd25jWnpuSjNkWGNEUVBtdFViMiszakFIdmlFSTgveFhYZkZiQUFJRi9mMzlUVjkxTVhDdkgvd1JidituWDNWMlIrRnJ3Z0NBczJWOGhheFFwY09WRndKOFMyakJuV1lFeklBVnNJZjV1QU52RUFCQ1FEZ1lCZUpBRWtnREUyR1ZSWENkeThCVU1CUE1BeVdnREN3RHE4RTZzQWxzQlR2QkhyQWYxSU1tY0J5Y0JoZkFaWEFkM0lXcnB3TzhBTjNnSGVoREVJU0UwQkFHWW9TWUl6YUlFK0tPK0NKQlNEZ1NneVFnYVVnR2tvMUlFQVV5RS9rQktVTldJT3VRTFVnMThndHlHRG1PbkVQYWtOdklRNlFUZVkxOFJER1VpdXFocHFndE9nTDFSZGxvTkpxRVRrQ3owU2xvRVRvZlhZSldvRlhvYnJRT1BZNWVRSytqN2VnTHRBY0RtQ2JHeEN3d1o4d1g0MkJ4V0RxV2hjbXcyVmdwVm81VlliVllJM3pPVjdGMnJBdjdnQk54QnM3Q25lRUtqc0tUY1Q0K0JaK05MOGJYNFR2eE92d2tmaFYvaUhmalh3ZzBnZ25CaWVCUDRCTEdFcklKVXdrbGhITENkc0lod2ltNGx6b0k3NGhFSXBOb1IvU0JlekdObUVPY1FWeE0zRURjUzJ3bXRoRWZFM3RJSkpJUnlZa1VTSW9qOFVnRnBCTFNXdEp1MGpIU0ZWSUhxVmREVThOY3cxMGpRaU5kUTZKUnJGR3VzVXZqcU1ZVmpXY2FmV1J0c2czWm54eEhGcENuazVlU3Q1RWJ5WmZJSGVRK2lnN0ZqaEpJU2FMa1VPWlJLaWkxbEZPVWU1UTNtcHFhbHBwK21tTTB4WnB6TlNzMDkybWUxWHlvK1lHcVMzV2tjcWpqcVFycUV1b09halAxTnZVTmpVYXpwWVhRMG1rRnRDVzBhdG9KMmdOYUw1MUJkNkZ6NlFMNkhIb2x2WTUraGY1U2k2eGxvOFhXbXFoVnBGV3VkVURya2xhWE5sbmJWcHVqemRPZXJWMnBmVmo3cG5hUERrUEhUU2RPSjE5bnNjNHVuWE02ejNWSnVyYTY0Ym9DM2ZtNlczVlA2RDVtWUF3ckJvZkJaL3pBMk1ZNHhlalFJK3JaNlhIMWN2VEs5UGJvdGVwMTYrdnFlK3FuNkUvVHI5US9vdC9PeEppMlRDNHpqN21VdVo5NWcvblJ3TlNBYlNBMFdHUlFhM0RGNEwzaE1NTVFRNkZocWVGZXcrdUdINDFZUnVGR3VVYkxqZXFON2h2anhvN0dZNHluR204MFBtWGNOVXh2V01Bdy9yRFNZZnVIM1RGQlRSeE5Fa3htbUd3MXVXalNZMnBtR21rcU5WMXJlc0sweTR4cEZtS1dZN2JLN0toWnB6bkRQTWhjYkw3Sy9KajVIeXg5RnB1Vng2cGduV1IxVzVoWVJGa29MTFpZdEZyMFdkcFpKbHNXVys2MXZHOUZzZksxeXJKYVpkVmkxVzF0YmozYWVxWjFqZlVkRzdLTnI0M0labzNOR1p2M3RuYTJxYllMYk90dG45c1oybkh0aXV4cTdPN1owK3lEN2FmWVY5bGZjeUE2K0Rya09teHd1T3lJT25vNWlod3JIUzg1b1U3ZVRtS25EVTV0d3duRC9ZWkxobGNOditsTWRXWTdGenJYT0Q5MFlickV1QlM3MUx1OEhHRTlJbjNFOGhGblJueHg5WExOYzkzbWV0ZE4xMjJVVzdGYm85dHJkMGQzdm51bCt6VVBta2VFeHh5UEJvOVhuazZlUXMrTm5yZThHRjZqdlJaNHRYaDk5dmJ4bG5uWGVuZjZXUHRrK0t6M3VlbXI1eHZ2dTlqM3JCL0JMOVJ2amwrVDN3ZC9iLzhDLy8zK2Z3VTRCK1FHN0FwNFB0SnVwSERrdHBHUEF5MERlWUZiQXR1RFdFRVpRWnVEMm9NdGdubkJWY0dQUXF4Q0JDSGJRNTZ4SGRnNTdOM3NsNkd1b2JMUVE2SHZPZjZjV1p6bU1Dd3NNcXcwckRWY056dzVmRjM0Z3dqTGlPeUltb2p1U0svSUdaSE5VWVNvNktqbFVUZTVwbHcrdDVyYlBjcG4xS3hSSjZPcDBZblI2NklmeFRqR3lHSWFSNk9qUjQxZU9mcGVyRTJzSkxZK0RzUng0MWJHM1krM2k1OFMvK3NZNHBqNE1aVmpuaWE0SmN4TU9KUElTSnlVdUN2eFhWSm8wdEtrdThuMnlZcmtsaFN0bFBFcDFTbnZVOE5TVjZTMmp4MHhkdGJZQzJuR2FlSzBoblJTZWtyNjl2U2VjZUhqVm8vckdPODF2bVQ4alFsMkU2Wk5PRGZSZUdMZXhDT1R0Q2J4SmgzSUlHU2tadXpLK01TTDQxWHhlaks1bWVzenUva2MvaHIrQzBHSVlKV2dVeGdvWENGOGxoV1l0U0xyZVhaZzlzcnNUbEd3cUZ6VUplYUkxNGxmNVVUbGJNcDVueHVYdXlPM1B5ODFiMisrUm41Ry9tR0pyaVJYY25LeTJlUnBrOXVrVHRJU2Fmc1UveW1ycDNUTG9tWGI1WWg4Z3J5aFFBLysxRjlVMkN0K1ZEd3NEQ3FzTE95ZG1qTDF3RFNkYVpKcEY2YzdUbDgwL1ZsUlJOSFBNL0FaL0JrdE15MW16cHY1Y0JaNzFwYlp5T3pNMlMxenJPYk1uOU14TjNMdXpubVVlYm56Zml0MkxWNVIvUGFIMUI4YTU1dk9uenYvOFkrUlA5YVUwRXRrSlRjWEJDell0QkJmS0Y3WXVzaGowZHBGWDBvRnBlZkxYTXZLeXo0dDVpOCsvNVBiVHhVLzlTL0pXdEs2MUh2cHhtWEVaWkpsTjVZSEw5KzVRbWRGMFlySEswZXZyRnZGV2xXNjZ1M3FTYXZQbFh1V2IxcERXYU5ZMDE0UlU5R3cxbnJ0c3JXZjFvbldYYThNcmR5NzNtVDlvdlh2TndnMlhOa1lzckYyayttbXNrMGZONHMzMzlvU3VhV3V5cmFxZkN0eGErSFdwOXRTdHAzNTJmZm42dTNHMjh1MmY5NGgyZEcrTTJIbnlXcWY2dXBkSnJ1VzFxQTFpcHJPM2VOM1g5NFR0cWVoMXJsMnkxN20zcko5WUo5aTN4Ky9aUHh5WTMvMC9wWUR2Z2RxRDlvY1hIK0ljYWkwRHFtYlh0ZGRMNnB2YjBocmFEczg2bkJMWTBEam9WOWRmdDNSWk5GVWVVVC95TktqbEtQemovWWZLenJXMHl4dDdqcWVmZnh4eTZTV3V5ZkducmgyY3N6SjFsUFJwODZlampoOTRnejd6TEd6Z1dlYnp2bWZPM3plOTN6OUJlOExkUmU5TGg3NnpldTNRNjNlclhXWGZDNDFYUGE3M05nMnN1M29sZUFyeDYrR1hUMTlqWHZ0d3ZYWTYyMDNrbS9jdWpuK1p2c3R3YTNudC9OdXY3cFRlS2Z2N3R4N2hIdWw5N1h2bHo4d2VWRDF1OFB2ZTl1OTI0ODhESHQ0OFZIaW83dVArWTlmUEpFLytkUXgveW50YWZrejgyZlZ6OTJmTjNWR2RGNytZOXdmSFMra0wvcTZTdjdVK1hQOVMvdVhCLzhLK2V0aTk5anVqbGV5Vi8ydkY3OHhlclBqcmVmYmxwNzRuZ2Z2OHQvMXZTL3ROZXJkK2NIM3c1bVBxUitmOVUzOVJQcFU4ZG5oYytPWDZDLzMrdlA3KzZVOEdXL2dWd0NERGMzS0F1RDFEZ0JvYVFBdzRMbU5NazUxRmh3UVJIVitIVURnUDJIVmVYRkF2QUdvaFozeU41N1RETUErMkd6blF1NFFBSlMvOEVraEFQWHdHR3Bxa1dkNXVLdTRxUEFrUk9qdDczOWpDZ0NwRVlEUHN2Nyt2ZzM5L1orM3dXQnZBOUE4UlhVR1ZRb1JuaGsyaHlqUmRjTnhPUGhPVk9mVGIzTDh2Z2ZLQ0R6QjkvMi9BSWhwanNHWXFhWDFBQUFBT0dWWVNXWk5UUUFxQUFBQUNBQUJoMmtBQkFBQUFBRUFBQUFhQUFBQUFBQUNvQUlBQkFBQUFBRUFBQUZMb0FNQUJBQUFBQUVBQUFCc0FBQUFBRHR3QUhRQUFDNlRTVVJCVkhnQjdWMEhtQlRGRXE1TGhBdmtJMmRFSklpb0lDTHBRRUJBc3BJVkpJT0NrZ1dSNU9PcEJKOElLb2lDcUdTUXJDQ1NNeUpCQVJIaEZBUkJjanJnRXR6cnYvZDZtWjN0MlozTmQwZlg5OTN0VEU5M1QvYy9NOVhWVmRYVlFaUktLU2twT2RqaEFQYmJQaWdvcUNRN0RoSFgxSzlDUUNHZ0VIaUFFTGhMS1NsL1VsRFFmTmJuRHhrL3ZJYStCK0VmWTVEbDJkOGFsbGdrT1RtWlltTmo2ZXJWcTdpa1NDR2dFRkFJcEVrRXlwY3ZUMUZSVVpTdzgyZWk1THRlYTJOdzdod1VWcVlVVVdnb21PTnB4alFiTWQ1NEpBZ1NKZnY3Rll4eTNyeDVOSEhpZUxwOCtiTFhicXdxVWdnb0JCUUN2a0JnMGFJbDlQVFRUOU81dkJYcDNyVWJYcjFGY0hRdXl2Yk9FSXJvMWw0d3pJcU1kZElBd1NpSERSdnExUnVxeWhRQ0NnR0ZRSHBFNE43RkszU3R6M0RlZE1Zd2k3Q0RBY0ZNcW15UHFUY2tTa1VLQVlXQVFrQWhjQitCRzZNbXNpbCtNcVRMOXNGTXFpd0pIYVdhZXQ4SFNCMHBCQlFDQ2dFZ0FBa3o2Vmdzcys0RWxReG01eUhLbUtOZURJV0FRa0FoSUVmZzNtVnVEQThCczFTa0VGQUlLQVFVQWs0UVVNelNDVURxc2tKQUlhQVFBQUtLV2FyM1FDR2dFRkFJbUVCQU1Vc1RJS2tzQ2dHRmdFSkFNVXYxRGlnRUZBSUtBUk1Jd0NsZGtVTEFKUVFlZWVRUktsYXN1RjJaMzM4L1NxZE9uYkpMTjV1UU5XdFdxbFdydGwzMk8zZnUwTmF0Vyt6U1ZVSmdFWGp1dVlhVWxKUkVHemR1Q0d4RC9IUjNuekhMTEZteVVLWk1tWGczYnQyNlJYZnZlbS90cHArd29lRGdZSXFNak9TM2crUCs3ZHUzL1hWcmgvZHAwT0E1R2pCZ0lHTllSZW44K1FzMGZmbzBXcmh3Z2NNeTNyellybDE3NnRxMW0xMlZZOGVPb1prenY3QkxONXVRTzNjZSt2eHorL0wvL0hPR3FsVjcybXcxS3ArZkVNQ3p1bm56SnBVdlg5WlBkd3pzYlR4aWxwQUNXclpzU1FVS0ZLRDgrUXRRZEhRMFpjNmMyY29rdFYyTGk0dWpjK2ZPMGw5Ly9VVUhEeDZrYmR1MjBxKy8vb29nSHRwc2ZqOUdlMGVPSE1YN2tDOWZmaXBZc0FEclF4YStRRi9mR0RETUsxZXVNT25wSlAzKysrKzBaODhlMnJScEkzOWg5SGw5ZGY3RUUwL1FqQm1mYzBhT2UwUkdSckhWVjVQb3hvM3J0R2JOR2wvZFZ0V2JCaEhZdFd1M3k2M3ExS2tUSFQvK2g4dmxWQUVXVjhNVEVKNTg4a2w2NFlVWFRWVUJDYTEwNllmNUh5U2pvVVBmcEwvLy9wdEpJcC9UbkRsenVEaHZxaUl2WndLejdOU3BzNmxhUTFrVWtyeDU4L0svS2xXZW9wZGY3c1JXUWlYVHlwVXJhZXJVS1N4YTB3bFQ5WGlTcVVtVHBsWkdxYTBIejBFeFN5MGlHZis0VUtIQ3ZKTzdkNXRubWtsSmlSa2ZHQi8xMENObTZXbWJpaFl0U21QSC9vZGVlYVVydmZGR1B5NXhlbHFudjh1RGdiWnExWXFhTjI5TzA2WjlTdi83M3dlY2dmcXFIV0ZoWWRLcUlRMHJlakFSYU5QR25NRHlZS0xqdlY2bkNXdDRpUklsNk50dmwxR3paczI5MXpNLzF4UVNFa0o5Ky9hanI3LytobUNvOEJXdFgvK2p0T29mZmxnclRWZUpDZ0dGZ0hjUThJbGtlZW5TUmZyNTUzMFVGM2VUN3QyN1I5bXpaNmVISGlwTnBVcXhnSm9HQklscHlwU3BkUDM2TmRxeUpXMVlQbmZ0MnNYMXJMRDRnUUhteVJOTmxTcFZvdkR3Y0lOZUVOV29VWk1iS1RwMzd1UVRveGF3R1RWcUpBMGNPSWh5NU1oQk1KNTk4Y1huTkhmdUhNTTJxUXNLQVlXQTV3ajRoRmxDaHpkbXpHaTcxdVhMbDQ5TnVidnd2NGlJQ0x2cnNENVBtZkl4MWExYmgwVkJ1bVIzM2Q4SmJkdTJ0cnNscHQxMTZ6NUwvZnE5VG84OTlwamRkU1RBOE5Xelp5OCtMWmRtOERCeDl1d3Y2WnR2dnVaR0tCak9vRGRWcEJCUUNQZ1dBYjlPdzgrZlAwL2p4NzlQRFJzMk1QVEh5NWt6SjlOZnZ1RldyOEhJTUIzMkpZRXhyVnYzQTlOUk5tV00vU1BEVzczeFJuL0tuVHUzNFhVekY0ejBreWdMVjZ4cjE2NTV6Q2hoNE1xb2hQY0JmK21SMEc0SUQ0clNEZ0lCZVpQZ3VOeXVYVnZHZEg2VXV1aTBiZHVPSmt5WXdLZnhqcUNDeTFLYk5tMHBKcVlPbFNsVHh1b1RDU1lDOTZUdnZsdE5TNWQrNnhOTE85UUxreVpOWkZQelBOU2hRMGU3Wm1LcTNyNTlCL3I0NDZrMjE2Q0tlTzIxdmpacGNKOGFOR2dnVDRPRmMrREFnUVNQQWFndm9BclFTcmlRV2x1MGFHRlRIaWR3Mmw2K2ZMbGR1ajdoOGNjZnB4ZGZiTTM4RnF0UjhlSWxPRFBCL2MrZS9ZZGdWVjIwYUNHL3A3NmN1K2QxNnRTaHBrMmJTWXVmUEhuUzRZQWpMZVFnRVdxU2R1M2FFZTVadG14WjdsYUY3TmV2WDZkRGgzNmwxYXN0NzBOOGZMeGhMUlVxUE1wOFNMdmFYVDl4NGdSOSt1a25kdW01Y3VXaXQ5OGVhWmNPUi9vUkk5NnlTMy8xMWRlWVN1b2htM1E4Tnp3L0RQUnQyN1psM2htdjhQYXpXTE5jc1BqdHQ5OXM4dnY2Qk85dXZYcjErY3dKMzFneTI5L205T20vdVhwczc5NmYzSGIzdzJ5eWZ2MzY5T2lqRlptcllYNWV6NWt6WjFqZnQ3SjNicWZiOWZvYUQxRi9RSmdsYmc1SFkxaU9SNDhlSTlwaS9ZVitzSDc5ZXJSczJUSnJtdllBb3k0a3R6NTlYcFg2ZEVLWEZ4TVR3Ly93Y3I3MjJxdDArUEFoYlJWZU94NDNiaHcxYnZ3ODF4L3FLNFdiajU1Wndsa2Z6RXBQdzRjUEl6Q3lXYk5tMnd3ZytHQzBWTHAwYVduNUd6ZHVPR1NXOElGOS8vM3hETmNHMnVyNE1lNEJKZzMzSS94QmNoNDRjQUR6M2ZSc1h4TkkxaDkrK0JHQm9lZ0ovcW90VzNySG9BY20wNnRYYityZmZ3QUJYejFoMElFdUdYLzkrdlZqaHJpK3RHOGYyK1JLUW9VS0ZaTGlpNEZFeGl6RHd5T2srZUdzTFdPV0dOaXhiNHlXSUR5QVdVeWJOcDBQa3Rwcit1ZXZ2ZWJ0WTl3TDduQ0RCZzBtelBCQW1NRWdIVkl1VkU5SGpoem1BN3NyREJ6bHNZZ0JlblpzTUFaS1NFamdQdGs0eGplS3dRd3p5aE1uamlNcFRWSkE1WHlzT2pIU3QxV3RXazBLR0thbU0yZCt5Wm1sV0NFa3paaWFDRXY3a2lYZkd1b1hIWlUxY3cxR0xDT21YcTVjT1M0ZGF1dUpqMC9RbmxxUFM1WXN5UXhETTYwdmsvV0NGdzZLRnkvT3BLcnZwWXhTVmoyazJzV0x2N1ZLNnJJOFp0TEFuR1dNRXBKZDE2NnY4QVVLWnVweGxBZU04dE5QcDlPd1ljT2xqRkpmRm9QQy9Qa0xxR3JWcXZwTGZqbkg0Z0U5d1FkNXhJaTM3UmlsUHA4dno0RWpCclp4NC83TGpMSjM2YjMzM21XRHl6Tk1DaTVKSlVvVVkrL09zM3l3S0ZYcUlUWW9yeVQ0V0pzaDFJdEJBRUxSeFlzWCtTQmNxVkpGNW05ZGlobDhTN0RCdVJYQmt3UFM1dkxsSzdnaDJFeTlnY2dUVUdZSjQ4VEJnd2VrL1M1ZDJuYXFJakpObURDUlQ3UEV1WmxmVEN1bVQvK01aRVlsTStXZDVkbTVjNGRoRmpqaWF3a2pxb3pncEErSjJOdUVrWHp1M0hsOGhaSXJkV01hTzNic082NFVzY21MbFYxWU82d25xQzhnNmUvZnYxOS95YTF6ZklTTkdqVnlxU3lrVDN6QWtEalRBcFVwOHdoMTd2eEtRSnN5YXRSbzdpOE05ZFd6ejlibHhra3NHb0ZrQ1RYTnNXUEgyTXprUFRhTGFzUjE1Vk9uZm15cXZhZ1hNeSs0dkRWcTlCd1RYQmJ6VlhBb0RDOFRUT3Q3OU9qT0dQWC9LRnUyYkd4eHg4ZHBWbGNiVUdZSndQNzRRNzcwcW1EQmdyaHNRM1hyMXBXdUdOcTBhUlA3TU90VHlaTEYrV2k0WUFIMlJyY2xTQlJtVityWWxuUitoZ0FTUnBRM2I3VFJKWnQwNkloOFFXKzlOWUtLRkNscVZ6V01VMVdxUE1reGE5R2lHWjhHNlRPMWJ0Mkc2NEwxNmM3T01lWEhZZ01aalJ6NU52MzQ0enJaSlpmVE1KMkZkNFdlZHU3Y1NjOC8zNWozclZxMXF2VGxsN1AwV2JnYldJOGVQZTNTZloxdysvWWR1MXRBWlFRSnpGMHFYTGdJbWZrRE01SVJWcU4xNmRLVkxseTR3S2JoSGEzTVRKWVgwK1JPblY1aXE5anl5UzdicE1ITkR2WEd4cDZnM3IxN0VmUzRSalI1OG9kOCtURDJBbS9VcUxGUnRvQ21CMHhuS1hvTlk0eU1vQXZTMCt1djk5Y25jZDFUdDI1ZHJOTjVqSVpEaHc3aFN4TGg0cU1sQklEQUtodHZFd3dJUmhRUllRbkVJYTRuSnllSlE4TmZ2SkI3OS81TWlZa0ozRGhobU5ISkJTek5oTEZNVHg5OE1JaysrbWl5TlJsU1hzZU9IWmdDZjV0VlZ5VXVvdnc3NzR3VnA2WitzVlpkSmlWLzhzbkgzT1hKVkNVbU1rR0hwaWZvcHZIQlEyb0IvZlBQUDJ3S09JcjFLNWVkWVF6R1Flak5JZTM2aTV3OWYvak5idCsramJjYmtpL09uZEhPbmJ1Y1plSFhJYjNoVDA4d0tJTCs4NTkzVEwxdmlJc3dkKzVjeGdqdEJ5cHQzYkFyZ1BEK0pDWW1haS9aSFVONnhiY0o5VWpyMXEyNWNkWXVrMEZDY0hhTEh0VGdzc2ZKUWFHV2dTemd6TkpJZ2EyZnJtSmFpQ0FTZXBvMGFaS1ZVV3F2UVpyUU0wdm9ML0dIWUI3ZUpFY3VIbmZ2MnZwQU9vcGNCUDN0b0VFRERIV2dycllaekVEdk9nT2pEYUlVNlFtRDFvb1Z5KzBrdFdlZnJlY1NzOFFxTEQzdXVOZlNwVXVaaDRQM3Rsc3VWcXdZMWF4WlM5OE5OZ2g4WkdXVTJvdGZmVFhiamxuQ0lsdXVYSG1mR2YrMDl6ZHp2SG56WnFhTDcwZXViaUFvWTRDeSsrM2ViYzlVWWRDcVhyMEdseXJoUFdLV2xpOWY2cEJaZ3RIWHFWT1h4MzlBdjh3UUJnbDhBODg4VTUxTDJtWWpsZVU3YnF3R00zTmZzM2tDeml4ejVMQlkzZlFOMW92c3NnOERFc0h0MjdkWWlLankrdUtNU2NqWFVHTnE0RzFtS1pPaVJJT3VYemR2VVlhMFoyUXNFdlc1OGl2RDdQang0M2F1SzZKT1BlWkl4K0FDdlNlc3U4NElPdUhldmZ2WVpjTkhNR1RJSUsrNmhzQ3lMU09zQUpPOUQwYitwQlVyUHBvbW1DV01IMzM2OURJbFNlcjdiWlpaNnN2aHZGWXR5NEN6ZnYxNnFkQWhLNE8wdzRjUEcxM2k2VTgrV1puckhoR1ZDMUtqR1lMMGlZaGVNQ0lWS1ZLRTRGcG1rc3pkd0dSbGtteEJMTzFtd0psbGtTS1d5Q242QnNLZFFrdXkxVEtRNkZhc1dLWE41dlRZaks3RmFTVzZETkNIR2hGY3BNelM0c1dMekdZMWxVK0dHYXlZYTliOFlLcTh5QVRNekRCTFRNdHk1ODRqaWxsL3NhSkxUSXV0aVI0ZXdIb3FvMFdMbHNpU0RkTVFsaTh0MEtwVks5MWlsSjYyWFJnZzRicmpDamw3bmhVcVZPRFZGU3RXbk1kZU5WdTNNTHJCaThJRlpnbG01bXY2STZETUVtNUFsU285THUza3NXTy8yNlI3dWhwR1ZBYkx1TGVwU3BVcTBpb3hVcHFWWWpIOU9IdjJyTFFlZHhMaHErcXR2cG9ORENKamxHZzduTFkzYjk1RS8vNzdyenRka1piSmx5K3ZOTjNWUlBGeHVsck8yL205K2V4ZGFWdXVYTGw1ZHF5dTh5YUpkd0hHSy95NVNrbEp0dW9yVjh2N0luOUFtV1c5ZXZVTWZmbjBNZnF5Wk1ucWxmNDdHeEZkdlFtazJ4WXRXa3FMd1hDaTE3MUtNN0pFMlJUWUtLK1pkRE0rcUdicVFSNzQzWGxDc01KT212UUJNN3k4WkhwSzV1eCszdXFmSXgyeXRnMGhJYjUxSERHcm45TzJ5UnZIa1pFV1F5clVXZDZrcUNpTFliTkxsMWRvdzRiMTNxdzZZSFVGakZuQzhOQy92OFVLcCs4OWpCRGJ0bTIxU2I1Mjdhck51VGd4TXowVWVmSHI3Ukc4VmFzWENFN2ZNdnIrKys5a3lYNUpBNGJRNmVxTlQ1QmdYV1hNcmtnZHFGOXZWRUtIc1V3VHEwTysvdm9yci9RZks0Qms1T243WUdRWmo0cktKcnRkdWsrTGk3TXdTVzlMMlBDaEJqblM1NmMzOEFMR0xMRmlBUlp1R1dGOXN0N1ZBQzRnTXFwZHV4WmR1blJSZHNubmFWQkVqeGt6Vm5vZmZMUllseDRvZ2xJZGZuT3crR29KeTlTYU5QR2RIOXVJRWNPWi8rWlQwaVdBZU9ZWUJNMnFKclR0MWg4YlRlblJOMC9xbDYyd3diMExGeTdFQng0OU04MmVQWDB6MFFzWExOUHZFaVZLNmlGMmVPN01MMVE4SDhSQ3lDamsyN21GQkNYb3Y5NTc3MzNxMXEyNzVDb3pPVEVtbzE5UGpZeFlXU0NqbmoxN3lwSjludmJNTTgrdzFRaEwrS29EMmMzZ25nUHBMcEMwZi84K3U5dFhyRmlSbm5xcXFsMjZOeEpnb0pvL2Z6NWZLaWNrQzIyOWVQWllVdWZzUTlPV01UbzJXdHZkdlhzUG95S20wbzE4WnJIWFViVnF6OWpWZ1psRmVpYnhYUm5wM1kzNmhoMCtIZEdCQS92NVpmMDZlRWRsMHZvMXZ6QkxUQVd4VGhxQkx6WnYzc29jb0Y4eXhHWFVxSkhTRlFRSTdpRFQvOEZWQmV1Q0hTMWx4TWZweUdKdDJCamRCVmpvR2pac3lJSmRmRWtMRml5U1duNVI1QWdMTnVBTDUzZGRjNXlld2dvdG81a3paL0VsYUVZK3JpZ0Q0NUJRMHN2cWtLV0o0QXB3ZzlFNnZXdnp3bGNXNzRHbmhFZzFXSmV2SjB6MXNjVE8wZnVBOXhFclhtVDA1NTkvR3JyUVlOMDAvRHRCcUFOTEZEMWx6ckkyK0RNTkFUeWd4NjlkTzhhbGtJSkdrYVJFMjZHdng0QUpGeUlqTlpYSW0xNStmVElOUjhneStHOGxKaWJ4OWJld1pNdWl3ZWhCUXNUdmI3K1Z1MzVneEo4ejV4dXBSSXFvSlozWXJuWGJ0bTNuVVV2dzhQRXlZOWtkL0FRUmRndTZ5Z1lONnVsdjZmQjgxNjQ5ZkVVRDJnNmRqaG1MUEtZZjNidDNNL3pnSE43UXl4Y3h3TVRHbnVCK2E5cXEwUmVzbFVmWUxZU0FnNG9EMDNiNEltTGFEbmNTREc2UWp0MTFKTWVXdUZneEpadUdJZm9NL08rT0hEbWliWlpMeHpETXpKdzVrd2RVMFJjRUE4TTdDUDlPTEtmRklDdmVCM3k0ZUI5dTNyekJuTEh0SlVXb2Z4Q3ZvSExsS3ZwcWVWK3d5Z25UZklUbWM2VG5FMXNvMjFXU3hoTGdBSTl2RHM4SzBZYmVlbXU0MHhaaVpSZ0dKUkJ3bFJFd256ZHZMZytDUFh6NENCWVZ5ak9KWDNZUGY2ZjVoRm1DdVR6MFVHblRmY0dIQ3NkYXJBOTFSRmltaDlVaFlJQjZ3alRKRWxDaGtmNFNQNGVrQVF1cVhoY3F6WnlhaU5VTitETkwrREM3ZGV2Q21ZL1pNcjdNQjJQTDRNR0RXUVNoSlZLakM5YU15OWFOaXpZWitUS0s2NDUrY2UreFkwY3pnODRjdTJ3d0FFMmVQSVd0MzI3azB2UFFWNFRsa3cwYk5wS3VYNGRrak9oSitKTVJEQSt3MHN0VUpWQWx5SmdsNmdGemtBMEErbnM0a3RyMWVRTjlQbVhLRkw3L0ZXWjhpS3U1ZHUxYXd5YmhPMElRa29TRWVEYlludWFEcWxGbXhCL0FpaTU4bDJERStIN1RNOG1IQlQvMkNPdE0yN1ZyNDVSUm9ra1E2enQzZnBuT25EbnRjZ3N4RlRjeUtMbGNtYTRBUmxIRU9vUnhRZTlNcjh2cTkxUG85dnIxNit1V3BGdStmRG1QMnJ1WkxYTXpDcHFCWU0yREJ3L3hxSDZFZWtOUWg5allXTGZxZ1lRcG8yWExscEpRS2NpdWE5T2dZemRhUVlOM0xqMFF2aWZFTDRYUU1tM2Faend1S0FZYlBjRnd0M3o1U2haMzlRbVdwejlUbDEzV1o3RTV4MERVdlh0WHJpN0JPbkVNbk5DWnl3aFlJU0MxTjFRMHN2cTlrZVlUeWRKWnd6Qk54Z2cyYjk0ODdvT2x0ekE2S2crdmZrU1VHVGx5Rkk5QTVNb0lEbW4zbDE5K2NWUzlTOWZ3a1dMbEJkUURzRHluVmNLYVh6RHg4ZVBIODdpQlp0c0poMldvSGk1ZmR2eFJPS3B2N05neFhCOG04NHZFUGtWWVp2ZlRUM3NjVmVIdzJybHo1MWdrOWliYzhSMVJ4bDFoVUFpa0xBdXZCNm00UzVmTzdQMWM0RkNLaE1xbFI0OXVURDlxOFNuVU54UlNtRXh5MWVmejlQenZ2OCtZcmdLREFMWjEwUlBjM0hyMjdNSDlZYUVtZ2VGMDM3NzlYRENCZWdhcndhQ2VnVG9Nc3lkOHYxQjlnUnd0aC8zMTExLzVOdEdRWG1OaUxBN3F3QTFDRWp3UE1BdkZLaXBFandkZUVEeXd4NVNyN20zNi92amkzQ05tQ1dzcjR0TkZSK2RsT3B6YzdFVU5aY0JGc3NqS3dYdzNSRGk2SXRndE5oOUQrSGd3RjFqZlVNNU1OQldqRGtQUGdwRVFZajZza1RWcjFtVGh1RXJaUk16QkM0OXBBaUw0UU5rTXgxZzhJRDNoNFdEekx4Z3pvSy9EdzhPb0doWVd5bzZ6OG1raWdtRmN1WEtWQlMrOXdQVlZSNDhlWmJ0WDduWExSUVVEQlREVGs5bVhBMnU3WmVXTjRvS0sreUFhVDVNbXozT0xidE9tVGJsN1QrSENoVzFXK1VCeVI5UW1oSnpiczJjMzMvWkR4aWh4TDFrYjBEWTlvYjZSSTBmdysrbXY0UnhlQllKWjRuMlIxV3ZrVXlucWc2Rm4yTENoM0l2aXhSZGY1SUVod0FnUjdWc01wbmdmb0p2Rk93aHBHMUx2b1VQR1MvekFoQkYvRVNIZ3NDZDgyYkxsK0JRY0F6dGlPMktRbkQxN05wZWFzUFdDck4weUlXRHYzcDlFczIxK1pkalpaSkNjeU80cHlXYVRaT1NDaDB6UWNjZkU3T1dHcStlZmI4S2ZEVmJab1I5UU1VR0NCaU1UZ1Q0MmJ0eklCd05uQTlUeDQzOXdBUWZHVVV6TG4zamlTYzQ0Y1UrODkzaStNRFR0M2J1WDRib3FUVEpLdERXSWlkNHBXQzJURVRacWh6NEppblV3UVB3cGNvNEFKRDRNRURDWWdLRmtKQUtqaE5RRFBiV2pmWGZNOUZuVWhRRkZ4Z1ROMUpFZTgwQ3Y2NnMrZzhsNnNuSUpjUUQ4NkpxMHp5UEpNcTA5Zkx6RS9wajJwTFYrZTlJZU1CSlhqRjZlM012ZlphR0Q4OWI3NE0yNi9JMkRKL2Z6Rm42eU5uakNLR1gxK1RvdDRBWWVYM2RRMWE4UVVBZ29CTHlCZ0dLVzNrQlIxYUVRVUFoa2VBUVVzOHp3ajFoMVVDR2dFUEFHQW9wWmVnTkZWWWRDUUNHUTRSRlF6RExEUDJMVlFZV0FRc0FiQ0NobTZRMFVWUjBLQVlWQWhrZEFNY3NNLzRoVkJ4VUNDZ0Z2SUtDWXBUZFFWSFVvQkJRQ0dSNEJ4U3d6L0NOV0hWUUlLQVM4Z1lCaWx0NUFVZFdoRUZBSVpIZ0VGTFBNOEk5WWRWQWhvQkR3QmdLS1dYb0RSVldIUWtBaGtORVJDUGNva0FhaS9DRHFSNVVxVlNsdjNtZ2VQUFR5NVN0OER4ckV1M01VNlFVaCtWdTBhTVVCUG5yMENBdlRKUTlkaFF6WTZLcE5tM1k4YjJ6c2NiWmR3SForYlBRUFlib2lJcUtNTHJPWWxnY01OMEJERko3MjdUc2Fsc1dGVFpzMjhGQm1za3lJd0YyelppMkdSMTYrVFVQV3JPRXM1TlJ0SHRZS0llSisrZVdncWFnMWlQQmRvRUJCRnBVbG1ZZm5keFRwQnZ1bkZDOXVpUjQvZi81Y2g0RXhzRjBFbnBjekhCR3VEaHViNWN5WmkyRVp6dnVDOEhLM2J0MW1vYzdPOERCbHAwNmRsRUVnVGNOOXNjbFZ6cHk1V1YyV1NFZDRQeEE4RjJIY2Z2dnRDQXVCWjM2WHptYk5tdkc2cERkamljN2VxYzZkdS9DaXp2Q1MxViszYmwwV1lkNnlGNC9zK3ZuejV4eEdHeGZ2cDZNMllyK25wazJiazdPNlpQZFhhVDVCb0t6YnpCSXhINGNPZlpQSCtVUFRFSjhTMndVZ1FDZ1k2QjkvSENNRTZqVWl4TUJzM0xneHY0ekFvbzZZWmRXcVZhMTVFZnZRR2JPTWlhbkw5OTh4dWpmaUpvcGQ3ZlI1RUw5UHRFdC9UWnpqdzhZSExxT0NCUXZSU3krOXpDOGhxZ3BDeFlIWmk3aUtZREFUSjA1d3loakFBQkVRRllTMkloNmxqSUI1cDA2ZGVXZzZYRisxYW9WMHd6ZFJGa3dWL2R1eVpiTkRITUhZdEJ2TEllcU82SU9vS3piMkJBdDhQSWN6T3BGbTlCc1RVNGNIQVRhNmp2b1I1eFN4UlJGTDBoblZxRkdUYlI1VzNHRTJSKytVZU1aTGxpeHlPTGpJYm9CTnVJeTJuVUIrQk5oMXREV0RlRC9yMUtuREJxMEIwdURLQ0kyR05qcXJTOWErQnkxdC9wNHpsSmg4ejJmZGJ2aG9Qc3FYTFRPNXpTekJFTXF5Z0tnSTdJa3RGYkFoR0FpQlVQRWlPV0tVeUJjWkdZRWZ2ck1jOXJrcHpqYVNNaW9EeGdHcEJvd3NQTnhTamhkMjh1K2pqejYwdGt1YjlkcTFhOXBUdytNMzM1UnZlMkFtS3ZxWk02ZlpZREtFeCtzRFEwTnc0cTVkdTdMOWcwcXl3TVdEYVBqd1lZYjN4UVZFalJaOXJsR2poaUd6eEc2SklvWW5JbG9ESDJmQmNoM2VXSGNSRE9lVFQ2YnlXUUptRWdpb2krMDVHalZxelBkWndrNktNMlpNSndTQ05VUFlTeDBiWkNGMkpuQ0pacHZLUGZaWUpjWVludWM3QVpZclY1N0dqWHVIQlcwK1lhWTYrdXl6NmZUbm43RjJlWDBaV2t6Y2JQSGloU3dJOU0vaTFQcnJhRVpsemNRT01JaDI3ZHFkRFo3anRjbnEyRVVFWHYzbUlGMjduZVJpS2ZQWk43OVprek5MdDNTV0NOcFpxMVp0Zmpkc0dpVVlKUklnRlNDS3RETVN1OThkU28xV1hiMTZUV2tSZkV4Z3lvaE1Ec0tVMEN5aFhXREErait6ekZKZlRwd2pVSzR6Z2xTSlB4QVlBeVR0ZDkvOUwyZUFZSnhGaXhaMVdBWHdBVk0rZi80OGs5U3I4WUZDVmdBRENhU3lRNGNza2llWXJEY0pLZ1R4OFVNVmdNanBrT3pmZm5zRWdmRkIydXpldmFmRGpjKzA3Y0cwV3dRWnhpL2VsN1ZyMTlDUUlZTllwT3lmT0FNWk5HZ0lEMGlzTFdkMGpDMEt4SFBSL25wendEQzY5NlZMbDZUM1JwdWNFVENGb0ZHNWNtV3FXdlZwWjluVjlUU0FnRnZNRXBHMUllV0I4TUs0UTRKWkhqaHdnSDg4MWF0WHQ1dm1vVjVzR1lFUFV1eVY0b3BrNlU2N2ZGa0cwZzYyVVFYbHlSUHQ4RmJBSnpFeGdlOFpCQWtFbTBUcENWSEFrWDcwNkcvV1BZQmNHVXowOWJseURnYTljT0VDUG9oaDhHelRwbzByeGUzeVFsMHhkZW9VUGpoQVgyZTBLNk5kd1hTYWdHOEllMUNCdW5UcGFyTzlSenJ0VW9adnRsdk1FcElWSkFTUXV5KzEyT1FKKzNsZ3p4ZHNqQ1hiZmJGV3JSaXU5eE02Um05TFR2NSt3bUt2YVVlU0QvcUlBZUxPblhodWpFSWJNUlhYRXdZWU1LbzllKzV2K09YdndXVEZpaFc4V1dEYXNrM0o5RzEyZEE2R3VXN2RXcDdsUVpDMllwbk9GeHQ2UWJXaDFRODd3a2hkQ3h3Q2JqRkxTQlVyVjFvK0VoZ1grdlI1amUzUWxzK2xYbUNmYnhDMk5CQWZ1MzRxRG1NUmRLQ1lnaU1mTmpkS3o4d1NWbFRnQk9PUUkwdXlrTG94VmNQSEJDYUNUWjcwMjVOQ0ZZSm5nYzJlRWhMaU9aNyt4Z2Nid2duZGFxRkNoWGtiUFBsMzZOQmhYbHkyTjd3bjlhYkZzdERaenA0OWk2dHI2dFdyei9ZL2Y4VGFUUFpZRmFVeEJOdzI4RUF2aWVsaGl4WXRLU1ltaGxrNmEzT21oejJYVDU2MFREVWQ5VlV3QkRCQjZLcTZkdTNHOXcyZU5lc0xxNjVQNkVXM2I5L0dxeEtXWmR6WHpHNkk0OGRQbERZQmhodm90NXpSd29XTHBWbmF0bTB0VGRjbVFzTERQc3VRRUNGTllyOWt1T0pBNXdmREU1aWNFUW1wRzlqZzc4Q0IvVnh2aWZLYk4yL2l4V0FVSzFYcUljWk1mK0hia3dxOW9yK200YUx0MEdOQ0J3emRNaXk0bnRMVnExZDRGWkNZelR6bjBhUEhTRzlwOWhsTEM1dE1oSkNBUHoxTm0vWUplMDZiOWNuU2MreTJ1SHIxS3JhRFpBdnExYXMzb2QwWWZPQ3hvU2h0SWVBMnN4UTZLL2hUd3BJSjF4QzRET0VQREJQNkxFY01RVEJMNFlONC9QZ2Y5UEREWmRpKzFvOXlWeGw4TEtnTDAzMngxN2RnQ0pDd3pEQkx1UGpJakRHeU5ObGpnVVRyTG9GNURCNXNhMDNIZHNCang0NTJ1b21Xd0VaSWk1QzhZZVRCdHJHQ1djSjFCaVRjcURDUWdNQ2svVTJRa0VCZzdKNFNucnNnWVNBVDU3TGZZOGQrdDZxRXROZk5QbU50R1ZlUElSVElkUGF5TkVkMXd6dWdldlVhaEFFUTJ4UXZYYnJVVVhaMUxVQUl1TTBzUlh0aHpadzU4d3RhdEdnaGR6SnYwcVFKdFd6WmlyMUVGMm45K3ZVaW05M3ZmWVpnK2NoMzdOakJtV1hWcXRVNHN3VFRoS1NDdll6RlJ4TWZmNGZYZzZtbWJEOXIvVTIrK21xMktRbFNYMDZjd3gvU1hZSVZlL3IwYVZ5eWhJTTY5a3d1WHJ3RTllM2JqOTU3NzEyVEE0bWx2L0EvaExSUnZud0ZQaFVISXdEekJJUEUvdDRnRERvZ2YwL0RZZWdURXVXTkc5ZDVHeno1QjkwMUNJT2hHZWE3WU1FQ1UzNmVuclRKcU95YU5kK2JsaUNONmtBNm5pTytvVGZmSE1hK25SZG82OWF0anJLcmF3RkN3QzJkcGF5dGtBQy8rZVlyN2s2QzZ3MGJOcEpsczZhSmp4ck83Q0I4OUpCRTRVcUJxU3VZSm1qTGxpMzhGLytFdEJBSTZjbmFDSk1IWU95UWJJOGNPY3hXL0d5a01XTkdjd1lQbjBLWlpWdGJyZkJCRmYyRlJJME42Q0hCUVhjSnQ2T0NCUXZ5TkNGdFkyVU55Ti9ZUU04R2FSRFBYK3RDcHUyUEs4Y1lFRURIamgxenBWaTZ6NHNCRWQ4QWpHUXZ2OXlKRDQ3cHZsTVpyQU5lWTVZQ0Z5SHBtSEdOUVJuQkxHRVZ4d2NDS2FWVXFWS01vVHpPZmZCZ1FCQWttSWRndENJOVBmeENVaEtNdjFvMXkwQmcxRzRoZFF0c2tHLzM3bDA4ZTZWS2xUakR4QWxVSUlMdVkyUGVEMVdVOWVSWHJJUkIreHlwWGN6Y0ExTHFjODgxNUZuMzdMSDAxMHk1akpMbnl5OW5jWWthc3dadkdNc3lDaTVwcFI5ZVo1WlpzbVRsZmROKzZMTE9naUZnK2lHbTJNZ2pERG5ObWpYbjdoVGJ0dGxPUjBTZC9qWml5TnJ2VHRxQkEvdDRzUW9WSG5WWVhLeHIxeXI1WWVRQlhoVXJQc1lsVXhoVmhFTS9LZ3ZFTkJ5cUJTejlnNHBnK2ZKbER2dms3Q0pXQi9YbzBaTzdrRUdGOFNCT1JTRXdMRmhnOGIxczNyeTUxWG5mR1hicXVuOFFjSXRaNHNXR0c0eHdUQmROaGNUWG9VTUhmdXBvWFM0Y2NqRjFFOUtRS0k5MTM1Qk9oSStkVm5KQ0htSFU4ZmRVVTdUUDA5L1kyRml1aDRQVHRTTlhLekVORjFOcjNCZjZPMHpGWVZuSHVtMFlkclRCTlFTVy9zQUd4cXRldmZvd1orcHVISkxQUDU4aE5YU1l4YXRreVZJMFlzVGJmTzA0MUFxVEozLzR3REtLSDM3NGdhMFhQOEdYZ0dxTlhXYXhWUGw4aDRCYkJoNVlyZkd4ZE9yMENuY29oNE0xM0YxZ2xBSERoRHZFMHFWTERGc3RtMllpOC9YcjE1bU83d2hWcUZDQnIwcTVxSXRDSXhpQzJXbDQvLzRER1pPeEdKQzBqY0VJRGlPTE01b3dZYUkwQzlvSTQ1R3JCQ2tha1lmZ1JnUUo4Y2NmMTBtcndNb2NrSkNrUlNhc1loTE82ZHUyM1orQzQ3b1lTTXhpSStwMDlsdXAwdU5zS2VKUVByQ0JFU01hVWVIQ0ZuOUtTTGRnbEQrNzREVlF2MzREdm53VmxuNjhCd2lHZ2NFREJQOVRyRU0vYWNLdFM3UzdkKzgrYkRtbXhSQW0wdkJyOWhtUEhmdU96YUFqNnNDYWJ4Z3RIUkVpWWNFVFJFYWpSNCt5UGhQWmRhTTBDQXN6Wm56RzNzL3hCS0ZFVWRwQndDMW1lZjc4djh4S3ZZNGJZN1RHQ2pBNytGL0NGVUo4dkxLdVFySUVJeng3OWgrN3l4czNicUNvcUVqR1NINjB1d1lMT01xbHBEaU9NSExseW1WZUZnWVI0ZGFpclV3WVJiUnA0aGpTbW1EU1JsSWFBbFlZRWFha0tJK1BWVVk3ZG16amp2WVBQL3l3SWJPRUZJazY5TlpsK0ZRaXdBVFM5UXdGQXduS2FOVWFzdnZqdVNDZldJRWx5NE0wWUlROGtHUXJWNjdDczBFTkFBYTVZOGQyN3M0RlozZ3pGbXNVUmwwb0Q4TVUva0NXdGx4ZzBZYjIwNzU5UDNOL1VyTjZUK0NMNXdPR0ludE9qcDR4N2cwTVFFSnR4RTgwL3h3OVk3em5vcnpzM3BwcXBJZmkvZFRPRExRWjhXeWgxa0NvUCtDdEtHMGdFTVJlenBUZHUzZXp0YjB2dXRVaVNBZHdIc2FINEk5SUwyNDFVaFh5Q0FGNEoyQkttTXdDWDNpRFVCZVlvaEd6OE1ZOVZCMFpINEZGaTVad1greWNmVmY3UE9wUTdUSjUzQS9SSmg1RlhGd2M0VTlSeGtVQWpNMWJqQklvT1pOK015NlNxbWZwR1FHbEZFblBUMCsxWFNHZ0VQQWJBb3BaK2cxcWRTT0ZnRUlnUFNPZ21HVjZmbnFxN1FvQmhZRGZFRkRNMG05UXF4c3BCQlFDNlJrQnppdzlEZHFhbmdGUWJWY0lLQVFVQW80UXlCeHFrU21EbWFYelJyRml4WlFEckNPMDFEV0ZnRUxnZ1VRZ21Mbk5sY29id1Z6ZDZBWTdEdHFBc0ZnTkdqUjRJTUZRblZZSUtBUVVBa1lJTkgrOEFFVkhaV2FSMEdnRDVNc1BrQkhMcTJSNzRCaFZvdElWQWdvQmhVQkdScUJpa2V6MFdlZEtvb3NmaERMSmNnZWJpbzlsMHVYbzc3NWJRMHVXTE9ZQkc5UnFISUdSK2xVSUtBVFNJZ0lpcHNEemorV25Xd25lV1YyR2Z1YklHa1kxSHM1RG5aNHBRbUVoWEY4NUZud3lTSURBR0daWDlqZVJKVnFpR29nTDZsY2hvQkJRQ0R5QUNEQTk1UlUyL1I3Q2VPSXNkTi9LTEhIQ21DV0NVZFpsZjJYWW4rZTdUN0ZLa2c0Y0toNi9la05uZHFqSTF3aUVoaVpFRGUvN3ZxOXZvK3BYQ0tRQkJMQVZadjdVZG14bnY5NFRMWWx1c1BvUXFuOGpZNVRXa0ZZMnpETDF4bDc5T1IxYVBDWW9LTVd5SmFGWGExYVZTUkM0WGpqcFZBNUp1a3BTQ0NnRVBFVEE0a0RrWVNXcXVFSkFJYUFReU9nSUtHYVowWit3NnA5Q1FDSGdGUVRjQ3Y3cmxUc0hvSktnOEt3VUhHM1phdlhlNWF1VUVxYzJzZy9BWTFDM1ZBaWtTd1FDeWl6REtwV25yRTNyVTBqeElzUWl3Vkx5bjZjb2Z1V1BsSFRFc2cxcXpzL0dVNWJHejlLTmNaUHAxbWR6UEFZNGM3MmFsSHZKREY3UDFlNkQ2ZmJYeGx0Zk9MMFpNNU1GWjdkcy8zQXZqbTFES3dtTUc1UWxNNFdWWjdheTRDQksrdTA0cGFSdVYydFRONHYwSFZxNkJHZmk5ODVmcE9RVEoyRnBzMllKeXBxRmdqSm5zcDdyRDFMaUV3aC9paFFDQ2dIZkloQXdacGw5MGlpS2ZMMnJYZTh5eHp4RGw1N3JRRUZob1JUZXBTMi9IdDZ4bFZlWXBkM04zRWxnVzFXRXQybEtrVU42V3hnaHErTlMvWGFVc0dYMy9kb1lJMlZXYVlvYTNKdUNJaU40T2hoYTNNUnBqUEYveEpraG1HRFUwRmNwb3RkTEZKem52cmRXY3V4SnV0cDlDQ1h1Mk12TFpSczNsQ0w3MmVNa2JuYnpQNVBwQnZ0VHBCQlFDUGdXZ1lBd3l5ek5HbGdaNWIyTFZ5aisrdzFFVEhyS1hPMUppbDluMllnckpTbVpyZzhkUjFrYTFLYWJIMXFrUWQ5Q1lhNzJmSWZXVTJpcDRnNHpaeHZabjZMZWZvUG51WHZxREJGai9DRUY4MU1VUzA5aGUvVGNmUDhUTGkxR0R1eEpZSnFRcXJHZUNuK29POCtxMlhTK2ZCMjZlKzZDdy92Z0l1cFRwQkJRQ1BnZWdjQXd5NFl4MXA1ZGJ0V05FdmNjc0p3elpxR2RjaVlkT016OE5BL1R2V3R3ZTJLejJSelpLT3l4Y3Z3WVpjQ0FNdFYrbXUwVG0wVHhhemNSOUpCYUFpUEs4bHdNaFJRcFNNbkhUakJlSlBlVXdqMHoxNnZGR0ZWUlZzYzFTdno1RjVZL1ZsdVY5ZmplbGV0ME4vTTVTdnIxS0ZNUjFMV21pd08wTWZMTjEvZ3BwTU5MRGRvVDI4Q0dvbmV2b3JCeUQxUFVrRmNwYnNvczNxZTR5VjlRMHFIZktYN1ZPc1pRd3lqbnRQY29hOXRtWEJyTjBySVIzZnIwSzRyN1lJYWR1Z0FTYWRiV1RiQS9BOTFaL0oyNHRmcFZDQ2dFZkloQVFKZ2xtSnVnaUo0dmNjYkVHU0xUMVduMWIzbCtYTUN6Sld6ZFE1ZnF0ZVdNVXFURlRaMUZrYSs5d2pob01NOERDZlZpM2RaV0poZjZVQW5LOC8zWEZuMW82czN1bmptWGVuVC9CL3JTNkhYemJQS2xKQ1RTdVR3VkNMOTZ1dFpuR0NYL2ZvS3l0bXN1WlpaaGoxZmdLZ1NVdTdONlBaUDhtSzhzKzR0ZnRwWXp5NkNvQ01wVXVTS2hUemRHVDdwZlBidFgzUFJ2T0xORVluRHVuUHphM2JQL0V2NEVoZVNQdHQ3Mzl2emxoR203SW9XQVFzRDNDRmc0amUvdlkzT0hXOHl3d3BrSVN3MS8rUVhLZjNJUDVmajR2MDZudDN5Nm1sb1Q5SGgzLzcxQTl5NWQ0U25CMGJrbzJ6dURMVmVaQkpscndhZFdCcGgwOEFnbDd2eVpRZ29YU0MxOS95ZjdlOE40UGpEcG0weW5DRU5TL1BLMVVrYUpVcEFvVXpUTS9uNU5scU9VTy9IV0pCaHVySlFwekhvWW5NZGlrYmNtcEI1a2V2SlJhMUx5MFJQV1krMUI1SkErRkJRUnp2V2VOeWRPMTE1U3h3b0JoWUFQRVFpSVpKbTAveEJkYWQyVGNrd2ZUNUNVNE5JVDBiTWpoYi9TaHE3QlNyMWdoYlRMOTI3YzMwVXljZmQrSmttMm9lREljTXAzZkFlM1RHZXUvaFF2bDRucFBzTXFsdVhIOGV1MjB1V21iTFVsazFwemZQSXVSZlRvWUZOM2FJbWkvQnlXNnZnVlAxRGlUd2R0cnJ0NkFyWEIzWDh2OG41RnNQNEVNU1lKNWhyKzBndldxbExZSHQ5NkNpbGFpS0pHcE9vNW1RUWN2OXArMy9TUUFubForenZ5b25lKy9ZNlNqeDdYVjZQT0ZRSUtBUjhoRUJESkVuMkovMzRqblM5ZG5hNzJIRXBKdi96R3V3ZkdrdU9MU1p6Uk9PdHZ3dVpkM0YwSDAvZmszLzZ3WkU5MXNRbDc5QkZyOFR0Z3ZLbXVPQW1iZGxyVHhVSDhkOHk0eEFqVDN1anR5eWw2eTdlVXVhYUY2WW84cnZ4aTZuNjEwK3VVQXNiT1ZBUmdraEZkMnpHUjlMN3E0ZTdmWjIycWhGU2NoNmtDZ25ObTV4TDNsWmRaZVlrN0VKZ3AzSkZBTnlkTXM2bERuU2dFRkFLK1JTQmd6QkxkQW1PNVBYc1JYYWphaE80c1djMTdDb1laVnNVYVE4NjQ5eHJtSTZiMDFzek1vR0lsamMraWJkZ1FTNDRiNzA2bDYyKzlUL2N1WE9ZSmtFcHpyNWxMMEhtNlMyRGsvNWFwU1ZjNzk2ZnJBOGJRcFVaTUwzdjhMMTdkM1hQbm1jOWxLbk5uS1ZBTmdFR0hsaXpHR2VYVmwvcFozWWEwOTRlUlNyaFNnY0ZEdGFCSUlhQVE4QjhDQVdHV01LcG9wVC9vSXJWVDdKVDQrM28vZDZDNHF6RjZaSDJ4c2JXS3pEV3JXbyt0Qjh5aUhEZHBPdjFiOG1tNk1YSUNUd2JEemx5dmhqV0xPd2V3ek1NQWMrdXJ4UlRlc1NYQkFSOFU5NzhaMXVwQ3k1Wm0wdXd5enBnaGlWNWhuZ0YzbHEyeFh0Y2VaR091U1BBOUJkMTgvMlB0SlhXc0VGQUkrQUdCZ09nc3d6dTBvR3hqQnRIZGs2Y3ArZFEvZk5vZFdxWVU3eTRzdjRuYmZ2S282NWh1dzBjUk9yNHN6OWVqNkowcktPWDZUY3I4cklZQnBrcWZ1ZVpNSlJobEV2Y2V0SkVtVTFMZGxkeHBDUG9DOTU3Z3ZIa28wOU5QV0ZmNm9GMXdCd0tGVlhpRThteFl5S2ZlNGg3UXFRcUNhOVNWam4zNUtYd3Z3enU5eUk4VE5teS83Mm9sTXF0ZmhZQkN3T2NJQklSWndyMEdCQW1UTDNWTTdTYVk1K1UydmFYNnV0UXNwbjVnVUxuNmNqL0t2ZUpMYmpuT1ZQa3hYdTdPd3BYM1hYT1lDdzkwaXBtWkh5YVdMWVozYm0ydE8ySGpEb0lCeFYyQzBRcFdma0hRUDRKSndsVklxQXpDbnFoZ3d5aURza1ZTQ1BzVEZIenlqRGlrcUxmNmNWOU5KQ2lwMGdxTE9sQUkrQlVCdVplMkY1c2dpMmVKNldRbU5pWEcxRFE0S3BJeHgzaXVnNHZmc01ObWpiV1FwckJtT3Y2SExSU2NLd2RsYVZLUHR3NUdJV0VZeXZKY2JRck9GODJkMDdXV2RPZ0RzN0tsaWNHNWNqTFhvYjBVdjJhVGxZa2w3bVdPNTh5YURLa056dVVoQmZQUnZkdDNLSWxKbUxDZ2E5MlVaSENnWEticWxmbWxCTGJxQ0Jad1FTSEZDbE1Fa3dUQkpKT1lUMmJpdGoxV3gzcVJSMXRlcEdsL1JaKzVrYWhEUzhiWWc3Z0VmR2V4UmJlcnphczVWdkVzTldDb1E0V0FOeEh3T2JQOE83UkVyZUNnZTF1ODJXaFZseUVDNTFudzMveUdWOVVGaFlCQ3dHMEVndDB1YWJaZ1NQSS9ack9xZko0aWtITEsweHBVZVlXQVFrQ09nTStaWmRHRTAyeVJkWkR5bnBiajc5WFVsS0JndVNuZHEzZFJsU2tFSGt3RWZNNHNBV3RLVU1yWUJ4TmV2L2I2YWtoaW92SXA4aXZrNm1ZUEVnSitZWlpGRWsvTlpTenpzd2NKV0QvM05TRTRKYmhkUVRwN3ljLzNWYmRUQ0R3d0NQaUZXUUxOUWtsLzkySFdKT1lEUTdaeDFCNFlxSDNXMGYzTXBiOW13ZVMvMXZuc0RxcGloWUJDUUxZQTBMZW9uS2JDV1ZsOHh4am00bGd5aGExSjhlM2RNbkx0OTI2ejZKOTdDeVdkT3BDUmU2bjZwaEJJS3dqOEh4QW1WZFNGcWV2cEFBQUFBRWxGVGtTdVFtQ0MiLz4NCiAgICA8L3BhdHRlcm4+DQogIDwvZGVmcz4NCiAgPHJlY3QgaWQ9IkltYWdlXzEiIGRhdGEtbmFtZT0iSW1hZ2UgMSIgd2lkdGg9IjIyNCIgaGVpZ2h0PSI3MyIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPg0KPC9zdmc+DQo="></div>
+      <div class="nav-label">Werkruimte</div>
+      <nav class="nav" aria-label="Hoofdnavigatie">
+        <button class="active" data-view="dashboard"><span class="nav-icon">⌂</span><span class="nav-text">Dashboard</span></button>
+        <button data-view="inventory"><span class="nav-icon">▦</span><span class="nav-text">Voorraad</span><span class="nav-count" id="lowNavCount">3</span></button>
+        <button data-view="orders"><span class="nav-icon">▤</span><span class="nav-text">Bestellingen</span><span class="nav-count">4</span></button>
+        <button data-view="warehouse"><span class="nav-icon">⌖</span><span class="nav-text">Magazijn</span></button>
+        <button data-view="reports"><span class="nav-icon">▥</span><span class="nav-text">Rapportages</span></button>
+      </nav>
+      <div class="side-spacer"></div>
+      <div class="side-help"><strong>Demo-omgeving</strong><span>Productnamen en merkstijl zijn geïnspireerd op <a href="https://www.dedriekleurede.nl/" target="_blank" rel="noreferrer">dedriekleurede.nl</a>. Voorraad, locaties en orders hieronder zijn fictief.</span></div>
+      <div class="profile">
+        <div class="avatar">DD</div>
+        <div><strong>Demo gebruiker</strong><small>Magazijnbeheerder</small></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">De Driekleur Ede <span class="muted">/</span> <b id="crumbTitle">Dashboard</b></div>
+        <div class="top-actions">
+          <label class="global-search"><span class="search-icon">⌕</span><input id="globalSearch" type="search" placeholder="Zoek product of artikel..." aria-label="Zoek product"></label>
+          <button class="icon-button" id="noticeButton" aria-label="Meldingen">♧<span class="notification-dot"></span></button>
+          <div class="avatar">DD</div>
+        </div>
+      </header>
+      <div class="content">
+        <div class="prototype-banner"><span>ⓘ</span><span><b>Interactief prototype met fictieve demo-data.</b> Geen echte database, AI, telefonie of barcodekoppeling. Voorraadstanden, locaties, klanten en rapportages zijn voorbeelden; aanpassingen blijven alleen tijdens deze sessie staan.</span><span class="tag">ALLEEN DEMO</span></div>
+
+        <section class="view active" id="view-dashboard">
+          <div class="page-head">
+            <div><h1>Goedemorgen, Jan 👋</h1><p class="subtitle">Voorraad en orderpicking voor olie, smeermiddelen en werkplaatsproducten.</p></div>
+            <div class="head-actions"><span class="date-chip">Demo-omgeving · vandaag</span><button class="btn primary" id="dashboardNewOrder">＋ Nieuwe bestelling</button></div>
+          </div>
+          <div class="kpis">
+            <article class="card kpi"><div class="kpi-top"><span>Artikelen op voorraad</span><span class="kpi-icon teal">▦</span></div><div class="kpi-value" id="stockKpi">6</div><div class="kpi-foot"><span class="up">●</span> producten in demo-overzicht</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Open bestellingen</span><span class="kpi-icon blue">▤</span></div><div class="kpi-value" id="ordersKpi">4</div><div class="kpi-foot">2 vragen om actie</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Onder bestelniveau</span><span class="kpi-icon amber">△</span></div><div class="kpi-value" id="lowKpi">3</div><div class="kpi-foot">Fictieve minimumvoorraad</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Gem. picktijd</span><span class="kpi-icon red">◷</span></div><div class="kpi-value">12 <small style="font-size:13px;font-weight:600">min</small></div><div class="kpi-foot"><span class="up">↓ 8%</span> ten opzichte van vorige week</div></article>
+          </div>
+          <div class="layout-grid">
+            <div class="stack">
+              <section class="card inventory-card">
+                <div class="card-head"><div><h2 class="card-title">Voorraad in beeld</h2><div class="card-hint">Recente artikelen en beschikbaarheid</div></div><button class="link-button" data-goto="inventory">Alle artikelen →</button></div>
+                <div class="filters"><input id="productSearchDash" type="search" placeholder="Zoek op naam of artikelnummer..." aria-label="Zoek in voorraad"><select id="statusFilterDash" aria-label="Filter op voorraadstatus"><option value="all">Alle statussen</option><option value="low">Onder bestelniveau</option><option value="good">Op voorraad</option><option value="out">Niet op voorraad</option></select><select id="categoryFilterDash" aria-label="Filter op categorie"><option value="all">Alle categorieën</option></select></div>
+                <div class="table-wrap"><table><thead><tr><th>Product</th><th>Locatie</th><th>Voorraad</th><th>Beschikbaar</th><th>Status</th></tr></thead><tbody id="productRowsDash"></tbody></table></div>
+                <div class="table-footer"><span id="productCountDash">6 artikelen</span><span>Demo-gegevens · bijgewerkt zojuist</span></div>
+              </section>
+              <section class="card">
+                <div class="card-head"><div><h2 class="card-title">Voorraadbeweging</h2><div class="card-hint">Inkomende en uitgaande artikelen deze week</div></div><div class="chart-legend"><span><i class="legend-dot"></i>Uitgaand</span></div></div>
+                <div class="chart-area"><div class="bars" aria-label="Voorraadbeweging deze week"><div class="bar-set"><div class="bar" style="height:52%"></div><span class="bar-label">ma</span></div><div class="bar-set"><div class="bar" style="height:78%"></div><span class="bar-label">di</span></div><div class="bar-set"><div class="bar" style="height:62%"></div><span class="bar-label">wo</span></div><div class="bar-set"><div class="bar" style="height:90%"></div><span class="bar-label">do</span></div><div class="bar-set"><div class="bar" style="height:68%"></div><span class="bar-label">vr</span></div><div class="bar-set"><div class="bar" style="height:44%"></div><span class="bar-label">za</span></div><div class="bar-set"><div class="bar" style="height:31%"></div><span class="bar-label">zo</span></div></div></div>
+              </section>
+            </div>
+            <div class="stack">
+              <section class="card assistant">
+                <div class="assistant-head"><div class="assistant-icon">✳</div><div><strong>Magazijnassistent</strong><small>Voorbeeld van spraakgestuurde hulp</small></div><span class="demo-state">SIMULATIE</span></div>
+                <div class="assistant-body">
+                  <div class="assistant-note">Dit paneel simuleert voorbeeldantwoorden. Er is geen AI of microfoon actief.</div>
+                  <div class="chat-log" id="chatLog" aria-live="polite"><div class="chat-message bot">Hoi! Ik kan je in deze demo helpen met voorraad of een pickopdracht. Probeer een voorbeeldcommando.</div></div>
+                  <div class="command-label">Probeer een voorbeeld</div>
+                  <div class="commands">
+                    <button class="command-chip" data-command="Welke artikelen zijn bijna op?">Welke artikelen zijn bijna op?</button>
+                    <button class="command-chip" data-command="Start de eerstvolgende pickopdracht">Start pickopdracht</button>
+                    <button class="command-chip" data-command="Waar staat MOB-001?">Zoek locatie</button>
+                  </div>
+                  <form class="chat-compose" id="assistantForm"><input id="assistantInput" placeholder="Typ een voorbeeldcommando..." aria-label="Typ een commando"><button class="send-button" title="Simuleer opdracht" aria-label="Verstuur">↑</button></form>
+                </div>
+              </section>
+              <section class="card pick-card">
+                <div class="card-head"><div><h2 class="card-title">Orderpicklijst</h2><div class="card-hint">Eerstvolgende opdracht</div></div><span class="pill blue" id="pickStatus">In behandeling</span></div>
+                <div class="pick-summary"><div><strong>DEMO-1048 · Demo garage 01</strong><span>Zone A, C en D · 3 productregels</span></div><span class="muted">▤</span></div>
+                <div class="progress-track"><div class="progress-bar" id="pickProgress"></div></div>
+                <div class="pick-lines" id="pickLines"></div>
+                <div class="pick-actions"><button class="btn small" id="resetPick">Opnieuw</button><button class="btn primary small" id="completePick">Bevestig picklijst</button></div>
+              </section>
+              <section class="card">
+                <div class="card-head"><div><h2 class="card-title">Recente bestellingen</h2><div class="card-hint">Laatste activiteit</div></div><button class="link-button" data-goto="orders">Bekijk alles →</button></div>
+                <div class="orders-list" id="recentOrders"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-inventory">
+          <div class="page-head"><div><h1>Voorraadbeheer</h1><p class="subtitle">Bekijk en filter de fictieve artikelvoorraad van De Driekleur.</p></div><div class="head-actions"><button class="btn primary" id="newProductBtn">＋ Product toevoegen</button></div></div>
+          <div class="kpis">
+            <article class="card kpi"><div class="kpi-top"><span>Artikelen</span><span class="kpi-icon teal">▦</span></div><div class="kpi-value" id="inventoryCount">6</div><div class="kpi-foot">Unieke demo-artikelen</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Onder bestelniveau</span><span class="kpi-icon amber">△</span></div><div class="kpi-value" id="inventoryLow">3</div><div class="kpi-foot">Controleer de fictieve voorraad</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Magazijnlocaties</span><span class="kpi-icon blue">⌖</span></div><div class="kpi-value">4</div><div class="kpi-foot">A-, B-, C- en D-zone</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Voorraadwaarde</span><span class="kpi-icon red">€</span></div><div class="kpi-value">€ 8.420</div><div class="kpi-foot">Voorbeeldbedrag, niet actueel</div></article>
+          </div>
+          <section class="card inventory-card">
+            <div class="card-head"><div><h2 class="card-title">Alle artikelen</h2><div class="card-hint">Zoek op artikel, categorie of magazijnlocatie</div></div><button class="btn small" id="clearFilters">Wis filters</button></div>
+            <div class="filters"><input id="productSearchInv" type="search" placeholder="Zoek product, artikelnummer of locatie..." aria-label="Zoek artikelen"><select id="statusFilterInv" aria-label="Filter op voorraadstatus"><option value="all">Alle statussen</option><option value="low">Onder bestelniveau</option><option value="good">Op voorraad</option><option value="out">Niet op voorraad</option></select><select id="categoryFilterInv" aria-label="Filter op categorie"><option value="all">Alle categorieën</option></select></div>
+            <div class="table-wrap"><table><thead><tr><th>Product</th><th>Categorie</th><th>Locatie</th><th>Fysiek</th><th>Gereserveerd</th><th>Beschikbaar</th><th>Status</th></tr></thead><tbody id="productRowsInv"></tbody></table></div>
+            <div class="table-footer"><span id="productCountInv">6 artikelen</span><span>Alle gegevens zijn fictief</span></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-orders">
+          <div class="page-head"><div><h1>Bestellingen</h1><p class="subtitle">Volg orderstatussen en open de volgende pickopdracht.</p></div><div class="head-actions"><button class="btn primary" id="ordersNewOrder">＋ Nieuwe bestelling</button></div></div>
+          <div class="kpis">
+            <article class="card kpi"><div class="kpi-top"><span>Vandaag ontvangen</span><span class="kpi-icon blue">▤</span></div><div class="kpi-value" id="todayOrderKpi">4</div><div class="kpi-foot">Fictieve orders</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Te verzamelen</span><span class="kpi-icon amber">◷</span></div><div class="kpi-value">2</div><div class="kpi-foot">Voorbeeldstatus</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Verzonden</span><span class="kpi-icon teal">✓</span></div><div class="kpi-value">2</div><div class="kpi-foot">Voorbeeldstatus</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Gem. ordergrootte</span><span class="kpi-icon red">▧</span></div><div class="kpi-value">4 <small style="font-size:13px">regels</small></div><div class="kpi-foot">Fictieve weekgemiddelde</div></article>
+          </div>
+          <section class="card wide-card">
+            <div class="card-head"><div><h2 class="card-title">Orderoverzicht</h2><div class="card-hint">Selecteer een status om de lijst te filteren</div></div><select id="orderFilter" class="btn" style="padding:8px 10px"><option value="all">Alle statussen</option><option value="Nieuw">Nieuw</option><option value="In behandeling">In behandeling</option><option value="Verzonden">Verzonden</option></select></div>
+            <div class="table-wrap"><table class="orders-table"><thead><tr><th>Bestelling</th><th>Klant</th><th>Ontvangen</th><th>Artikelen</th><th>Status</th><th></th></tr></thead><tbody id="orderRows"></tbody></table></div>
+            <div class="table-footer"><span>Demo-ordergegevens</span><span id="ordersCountLabel">4 bestellingen</span></div>
+          </section>
+          <section class="card wide-card">
+            <div class="card-head"><div><h2 class="card-title">Huidige pickopdracht</h2><div class="card-hint">Vink de regels af om de demo-opdracht af te ronden</div></div><button class="link-button" data-goto="dashboard">Terug naar dashboard →</button></div>
+            <div class="pick-summary"><div><strong>DEMO-1048 · Demo garage 01</strong><span>Zone A, C en D · looproute op basis van locatie</span></div><span class="pill blue" id="pickStatusOrders">In behandeling</span></div>
+            <div class="progress-track"><div class="progress-bar" id="pickProgressOrders"></div></div>
+            <div class="pick-lines" id="pickLinesOrders"></div>
+            <div class="pick-actions"><button class="btn small" id="resetPickOrders">Opnieuw</button><button class="btn primary small" id="completePickOrders">Bevestig picklijst</button></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-warehouse">
+          <div class="page-head"><div><h1>Magazijn</h1><p class="subtitle">Een eenvoudige demo-weergave van zones en orderpicking.</p></div><div class="head-actions"><button class="btn soft" id="warehouseStartPick">▶ Start pickopdracht</button></div></div>
+          <div class="warehouse-grid">
+            <section class="card"><div class="card-head"><div><h2 class="card-title">Magazijnzones</h2><div class="card-hint">Voorbeeldlocaties per productgroep</div></div><span class="pill good">4 zones actief</span></div><div class="zone-list">
+              <div class="zone"><span class="zone-code">A</span><div class="zone-text">Mobil motorolie<small>Locatie A · 1 demo-artikel</small></div><span class="pill good">Op voorraad</span></div>
+              <div class="zone"><span class="zone-code">B</span><div class="zone-text">Eni motorolie<small>Locatie B · 1 demo-artikel</small></div><span class="pill good">Op voorraad</span></div>
+              <div class="zone"><span class="zone-code">C</span><div class="zone-text">Reiniging &amp; werkplaats<small>Locatie C · 2 demo-artikelen</small></div><span class="pill low">2 laag</span></div>
+              <div class="zone"><span class="zone-code">D</span><div class="zone-text">Werkplaatsverbruik &amp; AdBlue<small>Locatie D · 2 demo-artikelen</small></div><span class="pill low">1 laag</span></div>
+            </div></section>
+            <section class="card pick-card"><div class="card-head"><div><h2 class="card-title">Pickopdracht</h2><div class="card-hint">DEMO-1048 · Demo garage 01</div></div><span class="pill blue" id="pickStatusWarehouse">In behandeling</span></div><div class="pick-summary"><div><strong>Verzamel 6 artikelen</strong><span>Controleer aantallen bij de locatie</span></div><span>⌖</span></div><div class="progress-track"><div class="progress-bar" id="pickProgressWarehouse"></div></div><div class="pick-lines" id="pickLinesWarehouse"></div><div class="pick-actions"><button class="btn small" id="resetPickWarehouse">Opnieuw</button><button class="btn primary small" id="completePickWarehouse">Bevestig picklijst</button></div></section>
+          </div>
+          <section class="card wide-card"><div class="card-head"><div><h2 class="card-title">Demo-barcode zoeken</h2><div class="card-hint">Voer een artikelnummer in om een scansituatie te simuleren</div></div><span class="demo-state" style="background:#f2f6fa;color:#728097;border-color:#e3e9ef">SIMULATIE</span></div><form class="scan-form" id="barcodeForm"><label for="barcodeInput">Barcode of artikelnummer</label><div><input id="barcodeInput" autocomplete="off" placeholder="Bijvoorbeeld MOB-001"><button class="btn primary" type="submit">Zoek demo-artikel</button></div><p>Geen barcodescanner aangesloten; dit veld accepteert alleen handmatige invoer.</p></form></section><section class="card wide-card"><div class="card-head"><div><h2 class="card-title">Magazijnassistent</h2><div class="card-hint">Voorbeeldcommando's zonder actieve AI of microfoon</div></div><span class="demo-state" style="background:#f2f6fa;color:#728097;border-color:#e3e9ef">SIMULATIE</span></div><div class="report-note"><strong>Je kunt de voorbeeldopdrachten hierboven gebruiken.</strong> De demo laat zien hoe een spraakassistent een locatie of picktaak zou kunnen bevestigen. Er wordt niets echt gescand, gesproken of opgeslagen.</div><div class="commands" style="padding:0 18px 17px"><button class="command-chip" data-command="Waar staat MOB-001?">Waar staat MOB-001?</button><button class="command-chip" data-command="Start de eerstvolgende pickopdracht">Start eerstvolgende pickopdracht</button></div></section>
+        </section>
+
+        <section class="view" id="view-reports">
+          <div class="page-head"><div><h1>Rapportages</h1><p class="subtitle">Fictieve voorbeeldcijfers om mogelijke inzichten te laten zien.</p></div><div class="head-actions"><span class="date-chip">Voorbeeldweek · 9–15 nov</span></div></div>
+          <div class="kpis">
+            <article class="card kpi"><div class="kpi-top"><span>Uitgaande orderregels</span><span class="kpi-icon teal">↗</span></div><div class="kpi-value">186</div><div class="kpi-foot">Fictief weektotaal</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Picknauwkeurigheid</span><span class="kpi-icon blue">✓</span></div><div class="kpi-value">98,4%</div><div class="kpi-foot">Illustratief voorbeeld</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Voorraadcorrecties</span><span class="kpi-icon amber">↻</span></div><div class="kpi-value">7</div><div class="kpi-foot">Fictieve weektotaal</div></article>
+            <article class="card kpi"><div class="kpi-top"><span>Indicatieve tijdwinst</span><span class="kpi-icon red">◷</span></div><div class="kpi-value">5,5 <small style="font-size:13px">uur</small></div><div class="kpi-foot">Aanname, geen meting</div></article>
+          </div>
+          <div class="report-grid">
+            <section class="card"><div class="card-head"><div><h2 class="card-title">Orderregels per dag</h2><div class="card-hint">Fictieve uitgaande voorraadbeweging</div></div></div><div class="chart-area"><div class="bars" style="height:180px"><div class="bar-set"><div class="bar" style="height:44%"></div><span class="bar-label">ma 9</span></div><div class="bar-set"><div class="bar" style="height:73%"></div><span class="bar-label">di 10</span></div><div class="bar-set"><div class="bar" style="height:60%"></div><span class="bar-label">wo 11</span></div><div class="bar-set"><div class="bar" style="height:91%"></div><span class="bar-label">do 12</span></div><div class="bar-set"><div class="bar" style="height:66%"></div><span class="bar-label">vr 13</span></div><div class="bar-set"><div class="bar" style="height:34%"></div><span class="bar-label">za 14</span></div><div class="bar-set"><div class="bar" style="height:23%"></div><span class="bar-label">zo 15</span></div></div></div></section>
+            <section class="card"><div class="card-head"><div><h2 class="card-title">Mogelijke besparing</h2><div class="card-hint">Slechts een rekenvoorbeeld</div></div></div><div class="report-stat"><div class="kpi-icon teal">◷</div><div><strong>550 uur</strong><span>Indicatieve uren per jaar bij 5 medewerkers</span></div></div><div class="report-stat"><div class="kpi-icon blue">€</div><div><strong>€ 13.750</strong><span>Bij aanname van 30 min/dag en €25 per uur</span></div></div><div class="report-note">Dit zijn <strong>onbevestigde aannames</strong> uit een eerder rekenvoorbeeld, geen voorspelling of gegarandeerde besparing. De werkelijke uitkomst hangt af van de werkwijze en moet worden gemeten.</div></section>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal" id="modalContent"></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const products = [
+      {sku:"MOB-001",name:"MOBIL-1 ESP 5W/30",category:"Motorolie",location:"A-02-04",stock:24,reserved:7,reorder:12,icon:"🛢️"},
+      {sku:"ENI-002",name:"ENI I-SINT MS 5W-30",category:"Motorolie",location:"B-01-02",stock:12,reserved:3,reorder:10,icon:"🛢️"},
+      {sku:"MOT-003",name:"MoTip Remmenreiniger 500 ml",category:"Reiniging",location:"C-02-01",stock:8,reserved:2,reorder:10,icon:"🧴"},
+      {sku:"PEV-004",name:"Pevastar handreiniger",category:"Werkplaatsverbruik",location:"C-01-03",stock:3,reserved:1,reorder:5,icon:"🧼"},
+      {sku:"PRO-005",name:"Procar Bonte Tricot Poetslappen 10 kg",category:"Werkplaatsverbruik",location:"D-01-01",stock:16,reserved:4,reorder:8,icon:"🧽"},
+      {sku:"ADB-006",name:"AdBlue",category:"Additieven",location:"D-02-01",stock:2,reserved:0,reorder:6,icon:"🧪"}
+    ];
+    let orders = [
+      {id:"DEMO-1048",customer:"Demo garage 01",date:"Vandaag · 09:42",lines:3,status:"In behandeling"},
+      {id:"DEMO-1047",customer:"Werkplaats demo 02",date:"Vandaag · 09:18",lines:4,status:"Nieuw"},
+      {id:"DEMO-1046",customer:"Transport demo 03",date:"Vandaag · 08:56",lines:2,status:"Nieuw"},
+      {id:"DEMO-1045",customer:"Demo klant 04",date:"Gisteren · 16:31",lines:5,status:"Verzonden"}
+    ];
+    const pickItems = [
+      {sku:"MOB-001",name:"MOBIL-1 ESP 5W/30",location:"A-02-04",qty:2},
+      {sku:"MOT-003",name:"MoTip Remmenreiniger 500 ml",location:"C-02-01",qty:1},
+      {sku:"PRO-005",name:"Procar Bonte Tricot Poetslappen 10 kg",location:"D-01-01",qty:3}
+    ];
+    let picked = new Set();
+    let toastTimer;
+    const esc = value => String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    function statusOf(product) {
+      if (product.stock <= 0) return "out";
+      if (product.stock <= product.reorder) return "low";
+      return "good";
+    }
+    function statusLabel(status) {
+      return status === "out" ? "Niet op voorraad" : status === "low" ? "Onder bestelniveau" : "Op voorraad";
+    }
+    function fillCategoryOptions() {
+      const categories = Array.from(new Set(products.map(p => p.category)));
+      ["categoryFilterDash","categoryFilterInv"].forEach(id => {
+        const select = document.getElementById(id);
+        const existing = select.value;
+        select.innerHTML = '<option value="all">Alle categorieën</option>' + categories.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join("");
+        if (categories.includes(existing)) select.value = existing;
+      });
+    }
+    function renderProducts() {
+      fillCategoryOptions();
+      const filters = [
+        {suffix:"Dash",query:document.getElementById("productSearchDash").value.trim().toLowerCase(),status:document.getElementById("statusFilterDash").value,category:document.getElementById("categoryFilterDash").value},
+        {suffix:"Inv",query:document.getElementById("productSearchInv").value.trim().toLowerCase(),status:document.getElementById("statusFilterInv").value,category:document.getElementById("categoryFilterInv").value}
+      ];
+      filters.forEach(f => {
+        const rows = products.filter(p => {
+          const matchesText = !f.query || [p.name,p.sku,p.location,p.category].some(v => v.toLowerCase().includes(f.query));
+          return matchesText && (f.status === "all" || statusOf(p) === f.status) && (f.category === "all" || p.category === f.category);
+        });
+        const body = document.getElementById("productRows" + f.suffix);
+        if (!rows.length) {
+          body.innerHTML = '<tr><td colspan="' + (f.suffix === "Dash" ? "5" : "7") + '" class="empty-row">Geen artikelen gevonden. Pas je zoekopdracht of filters aan.</td></tr>';
+        } else {
+          body.innerHTML = rows.map(p => {
+            const state = statusOf(p);
+            const available = Math.max(0,p.stock-p.reserved);
+            const product = '<div class="product-cell"><span class="product-thumb">' + p.icon + '</span><span><span class="product-name">' + esc(p.name) + '</span><span class="product-sku">' + esc(p.sku) + '</span></span></div>';
+            if (f.suffix === "Dash") return '<tr><td>' + product + '</td><td>' + esc(p.location) + '</td><td class="qty">' + p.stock + '</td><td>' + available + '</td><td><span class="pill ' + state + '">' + statusLabel(state) + '</span></td></tr>';
+            return '<tr><td>' + product + '</td><td>' + esc(p.category) + '</td><td>' + esc(p.location) + '</td><td class="qty">' + p.stock + '</td><td>' + p.reserved + '</td><td class="qty">' + available + '</td><td><span class="pill ' + state + '">' + statusLabel(state) + '</span></td></tr>';
+          }).join("");
+        }
+        const count = document.getElementById("productCount" + f.suffix);
+        if (count) count.textContent = rows.length + (rows.length === 1 ? " artikel" : " artikelen");
+      });
+      const low = products.filter(p => statusOf(p) !== "good").length;
+      document.getElementById("lowKpi").textContent = low;
+      document.getElementById("inventoryLow").textContent = low;
+      document.getElementById("lowNavCount").textContent = low;
+      document.getElementById("stockKpi").textContent = products.length;
+      document.getElementById("inventoryCount").textContent = products.length;
+    }
+    function renderOrders() {
+      const filter = document.getElementById("orderFilter").value;
+      const filtered = orders.filter(o => filter === "all" || o.status === filter);
+      document.getElementById("orderRows").innerHTML = filtered.length ? filtered.map(o => {
+        const style = o.status === "Verzonden" ? "good" : o.status === "Nieuw" ? "blue" : "low";
+        return '<tr><td class="order-number">' + esc(o.id) + '</td><td>' + esc(o.customer) + '</td><td>' + esc(o.date) + '</td><td>' + o.lines + ' regels</td><td><span class="pill ' + style + '">' + esc(o.status) + '</span></td><td><button class="link-button open-order" data-id="' + esc(o.id) + '">Open →</button></td></tr>';
+      }).join("") : '<tr><td colspan="6" class="empty-row">Geen bestellingen met deze status.</td></tr>';
+      document.getElementById("ordersCountLabel").textContent = filtered.length + (filtered.length === 1 ? " bestelling" : " bestellingen");
+      document.getElementById("ordersKpi").textContent = orders.length;
+      document.getElementById("todayOrderKpi").textContent = orders.length;
+      document.getElementById("recentOrders").innerHTML = orders.slice(0,3).map(o => {
+        const style = o.status === "Verzonden" ? "good" : o.status === "Nieuw" ? "blue" : "low";
+        return '<div class="order-row"><div class="order-icon">▤</div><div class="order-info"><strong>' + esc(o.id) + ' · ' + esc(o.customer) + '</strong><span>' + esc(o.date) + '</span></div><span class="pill ' + style + '">' + esc(o.status) + '</span></div>';
+      }).join("");
+    }
+    function renderPick() {
+      const all = picked.size === pickItems.length;
+      ["pickLines","pickLinesOrders","pickLinesWarehouse"].forEach(id => {
+        document.getElementById(id).innerHTML = pickItems.map((item,index) => '<div class="pick-line"><input type="checkbox" id="' + id + '-' + index + '" data-pick-index="' + index + '" ' + (picked.has(index) ? "checked" : "") + '><label for="' + id + '-' + index + '">' + esc(item.name) + '<span>Locatie ' + esc(item.location) + '</span></label><span class="pick-qty">× ' + item.qty + '</span></div>').join("");
+      });
+      const progress = Math.round(picked.size / pickItems.length * 100) + "%";
+      ["pickProgress","pickProgressOrders","pickProgressWarehouse"].forEach(id => document.getElementById(id).style.width = progress);
+      [["pickStatus", "pickStatusOrders","pickStatusWarehouse"]].flat().forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = all ? "Gereed" : "In behandeling";
+        el.className = "pill " + (all ? "good" : "blue");
+      });
+      ["completePick","completePickOrders","completePickWarehouse"].forEach(id => {
+        document.getElementById(id).disabled = !all;
+        document.getElementById(id).style.opacity = all ? "1" : ".56";
+      });
+    }
+    function toast(message) {
+      const el = document.getElementById("toast");
+      el.textContent = message; el.classList.add("show");
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+    }
+    function setView(name) {
+      document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+      document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+      const labels = {dashboard:"Dashboard",inventory:"Voorraad",orders:"Bestellingen",warehouse:"Magazijn",reports:"Rapportages"};
+      document.getElementById("crumbTitle").textContent = labels[name] || "Dashboard";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    function addChatMessage(text,kind) {
+      const log = document.getElementById("chatLog");
+      const bubble = document.createElement("div");
+      bubble.className = "chat-message " + kind;
+      bubble.textContent = text;
+      log.appendChild(bubble);
+      log.scrollTop = log.scrollHeight;
+    }
+    function runCommand(raw) {
+      const command = raw.trim();
+      if (!command) return;
+      addChatMessage(command,"user");
+      const normalized = command.toLowerCase();
+      let answer;
+      if (normalized.includes("bijna op") || normalized.includes("laag") || normalized.includes("voorraad")) {
+        const low = products.filter(p => statusOf(p) !== "good");
+        answer = low.length ? "In deze demo staan " + low.length + " artikelen onder bestelniveau: " + low.map(p => p.name + " (" + p.stock + ")").join(", ") + "." : "In deze demo is geen artikel onder bestelniveau.";
+      } else if (normalized.includes("locatie") || normalized.includes("waar ligt") || normalized.includes("waar staat") || normalized.includes("mobil")) {
+        const product = products.find(p => p.sku === "MOB-001");
+        answer = "MOBIL-1 ESP 5W/30 staat op locatie " + product.location + ". Er zijn " + product.stock + " stuks in de fictieve voorraad.";
+      } else if (normalized.includes("pick") || normalized.includes("pak") || normalized.includes("order")) {
+        setView("warehouse");
+        answer = "De demo-pickopdracht DEMO-1048 staat klaar. Begin bij A-02-04, daarna C-02-01 en D-01-01. Vink de regels af in de picklijst.";
+      } else {
+        answer = "Ik heb je voorbeeldcommando ontvangen. Probeer bijvoorbeeld: “Welke artikelen zijn bijna op?” of “Waar staat MOB-001?”";
+      }
+      setTimeout(() => addChatMessage(answer,"bot"),180);
+    }
+    function openModal(content) {
+      document.getElementById("modalContent").innerHTML = content;
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+    function closeModal() { document.getElementById("modalBackdrop").classList.remove("open"); }
+    function productModal() {
+      openModal('<div class="modal-head"><h2 id="modalTitle">Demo-product toevoegen</h2><button class="close-modal" type="button" data-close>×</button></div><form id="productForm"><div class="field"><label for="newProductName">Productnaam</label><input id="newProductName" name="name" required placeholder="Bijv. Motorolie 5W/30"></div><div class="field"><label for="newProductSku">Artikelnummer</label><input id="newProductSku" name="sku" required placeholder="Bijv. DEMO-5001"></div><div class="field"><label for="newProductCategory">Categorie</label><select id="newProductCategory" name="category"><option>Motorolie</option><option>Reiniging</option><option>Werkplaatsverbruik</option><option>Additieven</option></select></div><div class="field"><label for="newProductStock">Fictieve voorraad</label><input id="newProductStock" name="stock" type="number" min="0" value="10" required></div><div class="field"><label for="newProductLocation">Magazijnlocatie</label><input id="newProductLocation" name="location" required placeholder="Bijv. A-01-01"></div><div class="modal-actions"><button class="btn" type="button" data-close>Annuleren</button><button class="btn primary">Voeg toe aan demo</button></div></form>');
+    }
+    function orderModal() {
+      openModal('<div class="modal-head"><h2 id="modalTitle">Demo-bestelling toevoegen</h2><button class="close-modal" type="button" data-close>×</button></div><form id="orderForm"><div class="field"><label for="newOrderCustomer">Klantnaam</label><input id="newOrderCustomer" name="customer" required placeholder="Bijv. Restaurant Aan de Haven"></div><div class="field"><label for="newOrderLines">Aantal productregels</label><input id="newOrderLines" name="lines" type="number" min="1" value="3" required></div><div class="modal-actions"><button class="btn" type="button" data-close>Annuleren</button><button class="btn primary">Voeg toe aan demo</button></div></form>');
+    }
+    document.querySelectorAll(".nav button").forEach(button => button.addEventListener("click",() => setView(button.dataset.view)));
+    document.querySelectorAll("[data-goto]").forEach(button => button.addEventListener("click",() => setView(button.dataset.goto)));
+    ["productSearchDash","productSearchInv","statusFilterDash","statusFilterInv","categoryFilterDash","categoryFilterInv"].forEach(id => document.getElementById(id).addEventListener("input",renderProducts));
+    document.getElementById("globalSearch").addEventListener("input",event => {
+      document.getElementById("productSearchDash").value = event.target.value;
+      document.getElementById("productSearchInv").value = event.target.value;
+      renderProducts();
+    });
+    document.getElementById("globalSearch").addEventListener("keydown",event => { if(event.key==="Enter") setView("inventory"); });
+    document.getElementById("clearFilters").addEventListener("click",() => {
+      ["productSearchDash","productSearchInv","globalSearch"].forEach(id => document.getElementById(id).value = "");
+      ["statusFilterDash","statusFilterInv","categoryFilterDash","categoryFilterInv"].forEach(id => document.getElementById(id).value = "all");
+      renderProducts(); toast("Filters gewist.");
+    });
+    document.getElementById("orderFilter").addEventListener("change",renderOrders);
+    document.querySelectorAll("#dashboardNewOrder,#ordersNewOrder").forEach(b => b.addEventListener("click",orderModal));
+    document.getElementById("newProductBtn").addEventListener("click",productModal);
+    document.getElementById("modalBackdrop").addEventListener("click",event => { if(event.target.id==="modalBackdrop" || event.target.closest("[data-close]")) closeModal(); });
+    document.addEventListener("keydown",event => { if(event.key==="Escape") closeModal(); });
+    document.getElementById("modalContent").addEventListener("submit",event => {
+      event.preventDefault();
+      if (event.target.id === "productForm") {
+        const form = new FormData(event.target);
+        const name = String(form.get("name")).trim(), sku = String(form.get("sku")).trim().toUpperCase();
+        if (products.some(p => p.sku.toLowerCase() === sku.toLowerCase())) { toast("Dit artikelnummer staat al in de demo."); return; }
+        const stock = Number(form.get("stock"));
+        const category = String(form.get("category"));
+        const zone = category === "Motorolie" ? "A" : category === "Reiniging" ? "C" : "D";
+        products.unshift({sku,name,category,location:String(form.get("location")).trim().toUpperCase() || zone + "-01",stock,reserved:0,reorder:Math.ceil(stock*.3),icon:category==="Motorolie"?"🛢️":category==="Reiniging"?"🧴":category==="Additieven"?"🧪":"📦"});
+        renderProducts(); closeModal(); toast("Product toegevoegd aan de tijdelijke demo.");
+      } else if (event.target.id === "orderForm") {
+        const form = new FormData(event.target);
+        const next = 1049 + orders.length - 4;
+        orders.unshift({id:"ORD-" + next,customer:String(form.get("customer")).trim(),date:"Zojuist · demo",lines:Number(form.get("lines")),status:"Nieuw"});
+        renderOrders(); closeModal(); toast("Bestelling toegevoegd aan de tijdelijke demo.");
+      }
+    });
+    document.querySelectorAll("[data-command]").forEach(button => button.addEventListener("click",() => runCommand(button.dataset.command)));
+    document.getElementById("assistantForm").addEventListener("submit",event => { event.preventDefault(); const input=document.getElementById("assistantInput"); runCommand(input.value); input.value=""; });
+    document.addEventListener("change",event => {
+      if (event.target.matches("[data-pick-index]")) {
+        const index = Number(event.target.dataset.pickIndex);
+        if (event.target.checked) picked.add(index); else picked.delete(index);
+        renderPick();
+      }
+    });
+    function resetPicking() { picked.clear(); renderPick(); toast("Picklijst teruggezet."); }
+    function completePicking() {
+      if (picked.size !== pickItems.length) return;
+      const order = orders.find(o => o.id === "DEMO-1048");
+      if (order) order.status = "Verzonden";
+      renderOrders(); toast("Demo-picklijst afgerond. De bestelling is als verzonden gemarkeerd.");
+    }
+    ["resetPick","resetPickOrders","resetPickWarehouse"].forEach(id => document.getElementById(id).addEventListener("click",resetPicking));
+    ["completePick","completePickOrders","completePickWarehouse"].forEach(id => document.getElementById(id).addEventListener("click",completePicking));
+    document.getElementById("warehouseStartPick").addEventListener("click",() => { setView("warehouse"); toast("Demo-pickopdracht DEMO-1048 geopend."); });
+    document.getElementById("noticeButton").addEventListener("click",() => toast("Je bekijkt fictieve meldingen. Er is niets gekoppeld."));
+    document.getElementById("orderRows").addEventListener("click",event => {
+      const button = event.target.closest(".open-order");
+      if (button) {
+        const order = orders.find(o => o.id === button.dataset.id);
+        if (order && order.id === "DEMO-1048") { setView("warehouse"); toast("Pickopdracht DEMO-1048 geopend."); }
+        else toast("Bestelling " + button.dataset.id + " is alleen een voorbeeld.");
+      }
+    });
+    renderProducts(); renderOrders(); renderPick();
+    document.getElementById("barcodeForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const code = document.getElementById("barcodeInput").value.trim().toLowerCase();
+      const product = products.find(p => p.sku.toLowerCase() === code || p.name.toLowerCase().includes(code));
+      const toastElement = document.getElementById("toast");
+      const showScanToast = message => {
+        toastElement.textContent = message;
+        toastElement.style.opacity = "1";
+        toastElement.style.transform = "translateY(0)";
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastElement.style.opacity = "0";
+          toastElement.style.transform = "translateY(8px)";
+        }, 2400);
+      };
+      if (!code) { showScanToast("Vul een demo-artikelnummer in, bijvoorbeeld MOB-001."); return; }
+      if (!product) { showScanToast("Geen demo-artikel gevonden. Probeer MOB-001 of MOT-003."); return; }
+      showScanToast("Demo-scan: " + product.name + " · locatie " + product.location + " · " + product.stock + " stuks.");
+    });  </script>
+</body>
+</html>
